@@ -1,0 +1,79 @@
+# DECISIONS.md — Do not reopen without the owner
+
+Locked decisions for Campusly, in playbook §22.1 format. The conversation that produced them is in
+[`DECISION_JOURNAL.md`](DECISION_JOURNAL.md).
+
+## Decision table (playbook §22.2)
+
+| # | Decision | Agent recommendation (+ one reason) | Founder choice | Notes |
+|---|---|---|---|---|
+| 1 | Product shape | Web app (responsive) — works on phones without an app store | Web app | — |
+| 2 | First customer segment | Multi-school SaaS — matches tenancy design | Multi-school SaaS | Each school = one workspace |
+| 3 | Phase-1 scope | Students & classes, attendance, exams | + Fees; all 4 roles | See PLAN.md stories |
+| 4 | Cut line | Stages 7–9, 11–14 below the line | Accepted | Listed in PLAN.md |
+| 5 | Stack | Next.js + TypeScript + Drizzle + PGlite (embedded Postgres) | Accepted | Machine has no Docker |
+| 6 | AI stance | No AI in phase 1 | Accepted (via depth choice) | Stage 7 cut |
+| 7 | Hosting & region | Local only in phase 1 | Accepted (via depth choice) | Stage 11 cut |
+| 8 | Auth methods, 2FA | Email+password, 2FA later | Email+password + Google | Google hidden until keys exist |
+| 9 | Pricing unit & plans | Per student, prices later | Accepted | Plan = data row, limit enforced |
+| 10 | Price visibility | Decide in Stage 12 | Deferred (cut) | — |
+| 11 | Languages / locale | India defaults | Generic / international | Per-school currency + timezone |
+| 12 | Compliance | — | None specific (generic) | Must-never-happen list still applies |
+| 13 | Timeline | One build session, slice by slice | Accepted | — |
+| 14 | Flip test | Pricing unit (per student ↔ per school) | Accepted | `plan.limit_kind` column; flip = data change |
+
+---
+
+## D-001 — Customer is a multi-school SaaS
+Date: 2026-10-24   Decided by: Founder   Stage: 1
+Decision: Campusly is sold to many schools; each school is an isolated workspace.
+Options considered: A) multi-school SaaS B) single school C) school chain
+Reason: Teaches the playbook's tenancy, roles and SaaS foundations.
+Affects: Every table carries `school_id`; scoped client; authorization matrix tests.
+Reopen only if: a real buyer is a chain needing cross-branch data.
+
+## D-002 — Phase-1 roles: owner/admin, teacher, parent, student
+Date: 2026-10-24   Decided by: Founder   Stage: 1
+Decision: All four user types sign in. Parents and students are read-only.
+Reason: Founder chose all four.
+Affects: `can()`, visibility filters, invitation flow (parent/student invites linked to a student).
+
+## D-003 — Phase-1 modules: Students & classes, Attendance, Exams & report cards, Fees
+Date: 2026-10-24   Decided by: Founder   Stage: 1–2
+Decision: All four ship. Fees records payments manually; no live gateway.
+Reason: Founder: these are what the first schools demand.
+Affects: PLAN.md slice order.
+
+## D-004 — Locale: generic / international
+Date: 2026-10-24   Decided by: Founder   Stage: 1
+Decision: No country-specific formats. Each school sets currency (ISO 4217) and timezone (IANA).
+Reason: Founder chose generic.
+Affects: money stored as integer minor units + currency; dates stored UTC, shown in school timezone.
+
+## D-005 — Implement playbook stages 1–6 and 10
+Date: 2026-10-24   Decided by: Founder   Stage: 2
+Decision: Code implements stages 1–6 and 10. Others are documented below the cut line.
+Reason: Keeps the codebase teachable while covering the testing stage.
+
+## D-006 — Stack: Next.js + TypeScript + Drizzle + PGlite
+Date: 2026-10-24   Decided by: Founder   Stage: 2/4
+Decision: Next.js (App Router), TypeScript strict, Drizzle ORM, PGlite (Postgres compiled to WASM, in-process),
+Better Auth, Zod, Tailwind, Vitest, Playwright. `DATABASE_URL` set → real Postgres instead.
+Options considered: A) PGlite B) Docker Postgres C) SQLite
+Reason: Real Postgres semantics with zero installs for students.
+Reopen only if: PGlite blocks something (e.g. concurrent processes) in a measured way.
+
+## D-007 — Name: Campusly; brand: Calm & trustworthy
+Date: 2026-10-24   Decided by: Founder   Stage: 3
+Decision: Product name "Campusly". Deep-blue accent, neutral greys, clean sans-serif.
+Note: domain/trademark availability NOT checked (open founder item).
+
+## D-008 — Auth: email + password + Google
+Date: 2026-10-24   Decided by: Founder   Stage: 5
+Decision: Email+password and Google sign-in. Google button hidden until founder adds OAuth keys
+(agent never creates OAuth apps, §2.4). 2FA below the cut line.
+
+## D-009 — Pricing unit: per student, prices decided later
+Date: 2026-10-24   Decided by: Founder   Stage: 2
+Decision: Plans are data rows with a student limit. No billing code in phase 1.
+Affects: `plan` table; student-create enforces limit with a clear upgrade message.
