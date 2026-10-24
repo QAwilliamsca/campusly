@@ -314,7 +314,7 @@ add(
   }),
   h2("3.3 What Claude should show you"),
   ...checklist([
-    ["**16** locked decisions, D-001 to D-016, each with a reason", "docs/DECISIONS.md"],
+    ["**18** locked decisions, D-001 to D-018, each with a reason (D-016 is marked superseded by D-017)", "docs/DECISIONS.md"],
     ["The cut line: AI, real email, payment gateway, 2FA, admin console, marketing… each with \"what it would take\"", "docs/PLAN.md"],
     ["**8** user stories, S-01 to S-08, with Given / When / Then criteria", "docs/PLAN.md"],
     ["The roles × actions table (who may do what)", "docs/PLAN.md"],
@@ -589,6 +589,7 @@ add(
       ["Browser tests fail before starting", "The test browser isn't installed", "Run `pnpm exec playwright install chromium`"],
       ["A Build prompt's plan changes something users see that you didn't decide", "The prompt left a decision open", "Stop. Decide it yourself, or ask Claude for options and a recommendation"],
       ["Tests fail after your feature", "The new code broke an existing rule", "Ask Claude to explain the failing test before changing anything; never weaken a test to make it pass"],
+      ["Push fails with *Permission denied* or *403*", "You cloned the instructor's repository instead of your fork", "Fork it (Part 0.2), then ask Claude: *point origin at my fork, github.com/<your-username>/campusly, and push again*"],
       ["You changed something by accident", "", "Ask Claude: *show me git status, then restore the files I didn't mean to change*"],
     ],
     [3000, 3013, 3013],
