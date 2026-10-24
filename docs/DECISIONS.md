@@ -63,7 +63,7 @@ Options considered: A) PGlite B) Docker Postgres C) SQLite
 Reason: Real Postgres semantics with zero installs for students.
 Reopen only if: PGlite blocks something (e.g. concurrent processes) in a measured way.
 
-## D-007 — Name: Campusly; brand: Calm & trustworthy
+## D-007 — Name: Campusly; brand: Calm & trustworthy  ⟶ brand part superseded by D-013
 Date: 2026-10-24   Decided by: Founder   Stage: 3
 Decision: Product name "Campusly". Deep-blue accent, neutral greys, clean sans-serif.
 Note: domain/trademark availability NOT checked (open founder item).
@@ -93,3 +93,12 @@ Reason: A departed admin must be able to lose access; admins must not mint admin
 Date: 2026-10-24   Decided by: Founder   Stage: 10 (red-team #4)
 Decision: Creating a 4th owned school is refused; uploads beyond the plan's storage are refused with a clear message.
 Storage limit lives on the plan row (`plan.storage_mb`) so pricing can change it without code.
+
+## D-013 — Brand kit: "Evergreen" (replaces D-007's "Calm & trustworthy")
+Date: 2026-10-24   Decided by: Founder   Stage: 3 (reopened by the founder, §21.14)
+Decision: Deep teal-green accent (#0b6e5f; dark #5fd3bd), soft sage neutrals, Fraunces headings, Nunito Sans body,
+18px cards and 12px controls. Name "Campusly" unchanged.
+Options considered: 1) Ink & Paper (agent's recommendation) 2) Evergreen 3) Sunrise 4) Slate & Violet, all shown
+as real screens at /dev/brand, light and dark, each passing WCAG AA.
+Reason: Founder's choice. Friendly and natural; feels like a school rather than a bank.
+Impact (measured): tokens in globals.css, two fonts in layout.tsx, favicon colour. Zero component changes.

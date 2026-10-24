@@ -182,3 +182,29 @@ experience or what roles can do**, so they went to the founder.
 sounds technical, but it's a question about who the customer trusts, so the founder answers it.
 
 ---
+## Entry 7: The founder reopens the brand (Stage 3 again, playbook §21.14)
+
+**Founder said:** "Improve the brand kit, suggest me some brand kits and I will select."
+
+**Why Claude didn't just pick nicer colours:** brand direction is founder-owned (§8 🛑 ASK), and §8.4 says to
+show directions **as real screens (a dashboard and a marketing hero), not mood boards**. It also says to pick
+one and never blend. And because it reopened a locked decision (D-007), §21.14 applies: restate the old
+decision, estimate the impact, record the new one.
+
+**What Claude did first, without asking (technical, §1.2):**
+- Made fonts and control corner-radius into tokens too, so a kit could change typography and shape, not just colour.
+- Built `/dev/brand`: four kits rendered with the *real* components, light and dark side by side.
+- Ran a contrast check on every text/background pair in every kit. All passed AA; the lowest was 4.57:1 (Sunrise).
+
+| # | Question | Options offered | Claude recommended (+ reason) | Founder chose |
+|---|---|---|---|---|
+| 7.1 | Which brand kit? | Ink & Paper · Evergreen · Sunrise · Slate & Violet | **Ink & Paper**: closest to a trusted record system for principals and parents | **Evergreen** |
+
+**Impact, as predicted and then measured:** one CSS file, the font import and the favicon. **No component
+changed.** This is the payoff of the Stage 3 rule "components use tokens only". Without it, a rebrand means
+touching every screen.
+
+**Lesson for students:** the founder overrode the recommendation (the third time in this build), and Claude built
+it without re-arguing (§3.5). Recommending is the agent's job; deciding is the founder's.
+
+---

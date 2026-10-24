@@ -63,9 +63,9 @@ export default async function Fees({ params }: { params: Promise<{ slug: string 
               <tbody>
                 {invoices.map((i) => (
                   <tr key={i.id}>
-                    <td className="font-mono text-xs">{i.code}</td>
+                    <td className="whitespace-nowrap font-mono text-xs">{i.code}</td>
                     <td><Link className="text-accent hover:underline" href={`/s/${slug}/students/${i.studentId}`}>{i.studentName}</Link></td>
-                    <td>{i.description}</td><td>{i.dueOn}</td>
+                    <td>{i.description}</td><td className="whitespace-nowrap">{i.dueOn}</td>
                     <td>{formatMoney(i.amountMinor, cur)}</td><td>{formatMoney(i.paidMinor, cur)}</td>
                     <td><StatusBadge status={i.status} overdue={i.overdue} /></td>
                     <td>

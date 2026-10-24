@@ -1,0 +1,65 @@
+/*
+ * Candidate brand kits (PLAYBOOK §8.4). Each kit overrides only the tokens in globals.css,
+ * so the preview uses the real components. The chosen kit moves into globals.css :root.
+ */
+.kit { background: var(--bg); color: var(--text); font-family: var(--font-body); }
+
+/* 1 — Ink & Paper: refined "Calm & trustworthy"; academic serif headings on warm paper. */
+.kit-ink {
+  --accent: #2340b5; --accent-hover: #1c3392; --accent-fg: #ffffff; --accent-soft: #eaeefb;
+  --bg: #f8f7f4; --surface: #ffffff; --surface-2: #f1efe9; --border: #e2ded5; --text: #1a1d24; --muted: #5a5f6a;
+  --success: #17663a; --success-soft: #e5f3ea; --warn: #8a4b0b; --warn-soft: #fbf0de; --danger: #b42318; --danger-soft: #fdecea;
+  --focus: #2340b5; --radius: 12px; --control-radius: 8px; --shadow: 0 1px 2px rgb(26 29 36 / 0.05), 0 2px 6px rgb(26 29 36 / 0.05);
+  --font-body: var(--f-inter); --font-display: var(--f-serif);
+}
+.kit-ink[data-mode="dark"] {
+  --accent: #8ea6ff; --accent-hover: #a9bbff; --accent-fg: #0d1330; --accent-soft: #1a2142;
+  --bg: #0e0f12; --surface: #17181c; --surface-2: #1f2026; --border: #2d2f36; --text: #ecebe7; --muted: #a3a5ad;
+  --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #8ea6ff; --shadow: none;
+}
+
+/* 2 — Evergreen: friendly and natural; deep teal-green, soft rounded shapes. */
+.kit-evergreen {
+  --accent: #0b6e5f; --accent-hover: #08594d; --accent-fg: #ffffff; --accent-soft: #e3f3ef;
+  --bg: #f6f8f5; --surface: #ffffff; --surface-2: #eef2ed; --border: #dbe3da; --text: #16201c; --muted: #55635c;
+  --success: #1f6f3a; --success-soft: #e6f4ea; --warn: #8d4a06; --warn-soft: #fcf0dc; --danger: #b3261e; --danger-soft: #fceae8;
+  --focus: #0b6e5f; --radius: 18px; --control-radius: 12px; --shadow: 0 1px 3px rgb(22 32 28 / 0.06), 0 4px 12px rgb(22 32 28 / 0.04);
+  --font-body: var(--f-nunito); --font-display: var(--f-fraunces);
+}
+.kit-evergreen[data-mode="dark"] {
+  --accent: #5fd3bd; --accent-hover: #84e0ce; --accent-fg: #04211c; --accent-soft: #0f2e28;
+  --bg: #0c1311; --surface: #131c19; --surface-2: #1a2622; --border: #27352f; --text: #e6efe9; --muted: #9fb1a8;
+  --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #5fd3bd; --shadow: none;
+}
+
+/* 3 — Sunrise: warm and energetic; coral-orange, generous rounding. */
+.kit-sunrise {
+  --accent: #c2410c; --accent-hover: #9a3412; --accent-fg: #ffffff; --accent-soft: #fdeee6;
+  --bg: #fffaf5; --surface: #ffffff; --surface-2: #fbf1e8; --border: #f0e0d2; --text: #231a14; --muted: #6b5a4e;
+  --success: #1e6b3a; --success-soft: #e5f4e9; --warn: #855700; --warn-soft: #fdf3d6; --danger: #b4232a; --danger-soft: #fde9ea;
+  --focus: #c2410c; --radius: 20px; --control-radius: 999px; --shadow: 0 2px 8px rgb(35 26 20 / 0.06);
+  --font-body: var(--f-jakarta); --font-display: var(--f-jakarta);
+}
+.kit-sunrise[data-mode="dark"] {
+  --accent: #ff9a6b; --accent-hover: #ffb28e; --accent-fg: #2a0f02; --accent-soft: #3a1c0e;
+  --bg: #140f0c; --surface: #1d1612; --surface-2: #261d17; --border: #3a2d24; --text: #f6ece4; --muted: #bba898;
+  --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #ff9a6b; --shadow: none;
+}
+
+/* 4 — Slate & Violet: bold and modern; near-black neutrals, violet accent, tight corners. */
+.kit-slate {
+  --accent: #5b21b6; --accent-hover: #4c1d95; --accent-fg: #ffffff; --accent-soft: #f0eafc;
+  --bg: #f7f7f8; --surface: #ffffff; --surface-2: #f0f0f2; --border: #e2e2e6; --text: #0f0f14; --muted: #575762;
+  --success: #166534; --success-soft: #e6f4ea; --warn: #8a4b0b; --warn-soft: #fbf0de; --danger: #b42318; --danger-soft: #fdecea;
+  --focus: #5b21b6; --radius: 8px; --control-radius: 6px; --shadow: 0 1px 2px rgb(15 15 20 / 0.08);
+  --font-body: var(--f-inter); --font-display: var(--f-grotesk);
+}
+.kit-slate[data-mode="dark"] {
+  --accent: #b79cff; --accent-hover: #cbb6ff; --accent-fg: #1a0b3a; --accent-soft: #24183f;
+  --bg: #0b0b0e; --surface: #141418; --surface-2: #1c1c22; --border: #2b2b33; --text: #eeeef2; --muted: #a1a1ad;
+  --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #b79cff; --shadow: none;
+}
