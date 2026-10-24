@@ -36,7 +36,7 @@ export default async function Schools() {
       </div>
 
       <Card title="Create a school" className="mt-8">
-        <ActionForm action={createSchoolAction} className="grid gap-4 sm:grid-cols-3">
+        <ActionForm action={createSchoolAction} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="sm:col-span-3">
             <label className="label" htmlFor="name">School name</label>
             <input id="name" name="name" required maxLength={120} className="input" placeholder="Maple Grove School" />

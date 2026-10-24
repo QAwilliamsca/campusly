@@ -46,7 +46,7 @@ export default async function Audit({ params }: { params: Promise<{ slug: string
   return (
     <>
       <PageHeader title="Audit log" description={`Every change in this school, newest first (latest ${rows.length}). Times in ${ctx.school.timezone}.`} />
-      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_300px]">
         <Card className="min-w-0">
           <TableWrap>
             <table className="data-table">

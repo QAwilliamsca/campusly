@@ -22,7 +22,7 @@ export default function Home() {
           <Link href={start.href} className="btn-primary hidden sm:inline-flex">{demoMode() ? "Try the demo" : "Get started"}</Link>
         </nav>
       </header>
-      <section className="grid items-center gap-10 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+      <section className="grid grid-cols-1 items-center gap-10 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
         <div>
           <p className="badge bg-accent-soft text-accent">School management for every role</p>
           <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">One record for every student, shared by the whole school.</h1>
@@ -40,7 +40,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map(([icon, title, body]) => (
           <div key={title} className="card p-5">
             <span className="icon-chip"><Icon name={icon} /></span>

@@ -40,10 +40,10 @@ export default async function Students({ params, searchParams }: { params: Promi
         <Kpi label="Classes" value={classes.length} icon={<Icon name="grid" />} />
       </div>
 
-      <div className={staff ? "grid gap-6 xl:grid-cols-[1fr_340px]" : ""}>
+      <div className={staff ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : ""}>
         {staff && (
           <Card title="Admit a student" className="h-fit xl:order-2">
-            <ActionForm action={admitStudentAction} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
+            <ActionForm action={admitStudentAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
               <input type="hidden" name="slug" value={slug} />
               <div><label className="label" htmlFor="firstName">First name</label><input id="firstName" name="firstName" required maxLength={100} className="input" /></div>
               <div><label className="label" htmlFor="lastName">Last name</label><input id="lastName" name="lastName" required maxLength={100} className="input" /></div>

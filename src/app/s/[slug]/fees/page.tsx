@@ -38,10 +38,10 @@ export default async function Fees({ params }: { params: Promise<{ slug: string 
         <Kpi label="Outstanding" value={formatMoney(billed - collected, cur)} icon={<Icon name="alert" />} strong />
         <Kpi label="Overdue" value={formatMoney(overdueMinor, cur)} note={`${overdue.length} invoice(s)`} icon={<Icon name="alert" />} />
       </div>
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card title="Bill a whole class">
           {classes.length === 0 ? <p className="text-sm text-muted">Create a class first.</p> : (
-            <ActionForm action={billClassAction} className="grid gap-3 sm:grid-cols-2" resetOnSuccess>
+            <ActionForm action={billClassAction} className="grid grid-cols-1 gap-3 sm:grid-cols-2" resetOnSuccess>
               <input type="hidden" name="slug" value={slug} />
               <div><label className="label" htmlFor="bc-class">Class</label><select id="bc-class" name="classId" className="input">{classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
               <div><label className="label" htmlFor="bc-desc">Description</label><input id="bc-desc" name="description" required maxLength={120} placeholder="Term 1 tuition" className="input" /></div>
@@ -53,7 +53,7 @@ export default async function Fees({ params }: { params: Promise<{ slug: string 
         </Card>
         <Card title="Bill one student">
           {students.length === 0 ? <p className="text-sm text-muted">Admit a student first.</p> : (
-            <ActionForm action={createInvoiceAction} className="grid gap-3 sm:grid-cols-2" resetOnSuccess>
+            <ActionForm action={createInvoiceAction} className="grid grid-cols-1 gap-3 sm:grid-cols-2" resetOnSuccess>
               <input type="hidden" name="slug" value={slug} />
               <div><label className="label" htmlFor="ci-st">Student</label><select id="ci-st" name="studentId" className="input">{students.map((s) => <option key={s.id} value={s.id}>{s.code} · {s.firstName} {s.lastName}</option>)}</select></div>
               <div><label className="label" htmlFor="ci-desc">Description</label><input id="ci-desc" name="description" required maxLength={120} placeholder="Field trip" className="input" /></div>

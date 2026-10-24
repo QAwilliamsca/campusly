@@ -22,10 +22,10 @@ export default async function Exams({ params }: { params: Promise<{ slug: string
   return (
     <>
       <PageHeader title="Exams" description="Create an exam for a class, then enter each student's marks." />
-      <div className={classes.length > 0 ? "grid gap-6 xl:grid-cols-[1fr_340px]" : ""}>
+      <div className={classes.length > 0 ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : ""}>
       {classes.length > 0 && (
         <Card title="New exam" className="h-fit xl:order-2">
-          <ActionForm action={createExamAction} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
+          <ActionForm action={createExamAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
             <input type="hidden" name="slug" value={slug} />
             <div><label className="label" htmlFor="classId">Class</label><select id="classId" name="classId" className="input">{classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
             <div><label className="label" htmlFor="name">Exam</label><input id="name" name="name" required maxLength={80} placeholder="Term 1" className="input" /></div>

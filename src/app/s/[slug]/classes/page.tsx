@@ -31,7 +31,7 @@ export default async function Classes({ params }: { params: Promise<{ slug: stri
       {classes.length === 0 ? (
         <Card><Empty title="No classes yet" hint="Create one above. Then admit students into it and assign a teacher." /></Card>
       ) : (
-        <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {classes.map((c) => {
             const kids = students.filter((s) => s.classId === c.id);
             const teacher = teachers.find((t) => t.id === c.teacherMembershipId);

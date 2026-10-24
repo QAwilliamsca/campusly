@@ -4,7 +4,7 @@ import { Logo } from "./Logo";
 /** Split layout for sign-in, sign-up, password and invite pages (D-019). The form side owns the page's <h1>. */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-2">
+    <div className="grid grid-cols-1 min-h-dvh lg:grid-cols-2">
       <section className="panel m-4 hidden flex-col justify-between p-10 lg:flex">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold"><Logo className="h-8 w-8" /> Campusly</Link>
         <div>

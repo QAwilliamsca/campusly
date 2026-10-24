@@ -54,7 +54,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
           {staff && <Kpi label="Overdue" value={overdue.length} note={overdue.length > 0 ? `${overdue.length} overdue invoice(s)` : "Nothing overdue"} icon={<Icon name="alert" />} />}
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_340px]">
+        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]">
           <div className="min-w-0 space-y-6">
             <Card title={ctx.member.role === "teacher" ? "Your classes" : "Classes"}>
               {classes.length === 0 ? (
@@ -64,7 +64,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
                   action={staff ? { href: `${base}/classes`, label: "Create a class" } : undefined}
                 />
               ) : (
-                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {marked.map(({ c, n }) => (
                     <li key={c.id} className="tile flex flex-col p-4">
                       <div className="flex items-start justify-between gap-2">
@@ -80,7 +80,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
             </Card>
             {staff && attention.length > 0 && (
               <Card title="Needs attention">
-                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {attention.map((a) => (
                     <li key={a.key} className="tile flex flex-col items-start p-4">
                       <span className="font-semibold">{a.title}</span>
@@ -140,7 +140,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
       {cards.length === 0 ? (
         <Empty title="No student is linked to your account yet" hint="Ask the school to send you an invite linked to your child." />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {cards.map(({ k, att, rc, inv }) => {
             const owed = inv.reduce((a, i) => a + i.amountMinor - i.paidMinor, 0);
             const late = inv.some((i) => i.overdue);

@@ -25,7 +25,7 @@ export default async function ExamMarks({ params }: { params: Promise<{ slug: st
           <ActionForm action={enterMarksAction}>
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="examId" value={exam.id} />
-            <ul className="grid gap-2 lg:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               {students.map((s) => (
                 <li key={s.id} className="tile flex items-center gap-3 p-3">
                   <Avatar name={`${s.firstName} ${s.lastName}`} size="h-9 w-9 text-xs" />

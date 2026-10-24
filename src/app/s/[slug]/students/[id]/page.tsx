@@ -34,7 +34,7 @@ export default async function StudentPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <PageHeader title={`${st.firstName} ${st.lastName}`} description={`${st.code} · ${st.className ?? "No class"}${st.dateOfBirth ? ` · Born ${st.dateOfBirth}` : ""}`} />
-      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_1fr]">
         <div className="space-y-6">
           <section className="card p-5">
             <div className="flex flex-col items-center text-center">
@@ -73,7 +73,7 @@ export default async function StudentPage({ params }: { params: Promise<{ slug: 
 
         {staff && (
           <Card title="Edit details">
-            <ActionForm action={updateStudentAction} className="grid gap-4 sm:grid-cols-2">
+            <ActionForm action={updateStudentAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <input type="hidden" name="slug" value={slug} />
               <input type="hidden" name="id" value={st.id} />
               <input type="hidden" name="version" value={st.version} />

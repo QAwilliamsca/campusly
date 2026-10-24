@@ -23,7 +23,7 @@ export default async function Members({ params }: { params: Promise<{ slug: stri
           <li key={r} className="card p-4 text-center"><p className="text-2xl font-bold">{members.filter((m) => m.role === r).length}</p><p className="text-xs capitalize text-muted">{r}s</p></li>
         ))}
       </ul>
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
         <Card title={`Members (${members.length})`} className="min-w-0">
           <TableWrap>
             <table className="data-table">
@@ -55,7 +55,7 @@ export default async function Members({ params }: { params: Promise<{ slug: stri
         </Card>
         <div className="space-y-6">
       <Card title="Invite someone">
-        <ActionForm action={inviteAction} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
+        <ActionForm action={inviteAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1" resetOnSuccess>
           <input type="hidden" name="slug" value={slug} />
           <div><label className="label" htmlFor="email">Email</label><input id="email" name="email" type="email" required maxLength={254} className="input" placeholder="name@example.com" /></div>
           <div>
