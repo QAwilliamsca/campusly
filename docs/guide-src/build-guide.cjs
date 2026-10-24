@@ -126,7 +126,7 @@ function fig(file, caption, maxWIn = 6.0, maxHIn = 7.4) {
   ];
 }
 function partHead(no, title, intro) {
-  figPart = no; figNo = 0;
+  if (no !== 0) { figPart = no; figNo = 0; } // Part 0 continues the cover's figure numbers
   return [part(`Part ${no} · ${title}`), ...(intro ? [p(intro, { after: 160 })] : [])];
 }
 
@@ -152,7 +152,7 @@ add(
   ...table(
     ["Step", "When", "What you do", "Parts"],
     [
-      ["1 · Set up", "Before the session", "Fork the public repository, clone your fork, run the app", "0"],
+      ["1 · Set up", "Before the session", "Fork the public repository, open your fork as a project in Claude Code, run the app", "0"],
       ["2 · Explore", "In the session", "Reverse-engineer each built stage with read-only prompts and verify the evidence yourself", "1–10"],
       ["3 · Build", "In the session, then on your own", "Add new features on your own branches, with tests, and open pull requests on your fork", "11"],
       ["4 · Go live", "End of the session", "See how the same code was deployed to AWS EC2, and explore the deploy scripts", "13"],
@@ -163,7 +163,7 @@ add(
   ...table(
     ["Part", "What you do", "Prompt type"],
     [
-      ["0", "Fork the public repository and run it on your machine", "Orient"],
+      ["0", "Fork the public repository and make it a Claude Code project", "Orient"],
       ["1", "Learn the method: the playbook, the prompt formula, Explore vs Build", "None"],
       ["2–10", "Reverse-engineer each stage that is already built, and verify it", "Explore (read-only)"],
       ["11", "Add new features to Campusly", "Build"],
@@ -177,49 +177,62 @@ add(
 
 // ── Part 0 · Get set up ───────────────────────────────────────────────────────
 add(
-  partHead(0, "Get set up", "Do this before the session. It takes about ten minutes, and you need no coding knowledge."),
+  partHead(0, "Get set up: the repository as a Claude Code project", "Do this before the session. It takes about fifteen minutes, and you need no coding knowledge."),
+  ...box("HOW YOU WORK IN THIS COURSE", "Everything happens **in the Claude Code chat**. You never type commands into a terminal. When this guide says **Ask Claude:** followed by a sentence in italics, type that sentence into the chat. When it shows a prompt box, copy the whole box into the chat. Claude runs whatever is needed and shows you the result."),
   h2("0.1 What you need"),
   ...table(
     ["Item", "Where to get it"],
     [
       ["A free GitHub account", "github.com/signup (no invitation needed: the repository is public)"],
-      ["GitHub Desktop (recommended)", "desktop.github.com"],
-      ["Node.js 22 or newer (choose the LTS version)", "nodejs.org"],
-      ["Claude Code", "As set up in earlier sessions"],
+      ["GitHub Desktop: copies the code to your computer and signs you in to GitHub", "desktop.github.com; open it once and sign in with your GitHub account"],
+      ["Node.js 22 or newer: the engine the app runs on", "nodejs.org → download the **LTS** installer → click through it (no terminal needed)"],
+      ["The Claude desktop app with Claude Code (the **Code** tab)", "As set up in earlier sessions"],
     ],
     [4500, 4526],
   ),
-  h2("0.2 Get the code"),
-  p("Campusly is a **public** repository. Everyone in the course uses this one address:"),
+  h2("0.2 Fork the public repository"),
+  p("Campusly is a **public** repository. Everyone in the course starts from this one address:"),
   ...box("THE REPOSITORY", "**https://github.com/shivavashishtha/campusly**   ·   Live demo of the finished app: **https://campusly.13-127-195-244.sslip.io**"),
   ...steps([
     "Sign in to GitHub and open **https://github.com/shivavashishtha/campusly**.",
-    "Click **Fork** (top right) → **Create fork**. GitHub makes your own copy at **github.com/<your-username>/campusly**. You need your own copy because you can't push to the instructor's repository, and in Part 11 you push your own features.",
+    "Click **Fork** (top right) → **Create fork**. GitHub makes your own copy at **github.com/<your-username>/campusly**. You need your own copy because you can't change the instructor's repository, and in Part 11 you save your own features to yours.",
+  ]),
+  ...fig(DEP + "09-github-repo-public.jpg", "The public repository: Fork is at the top right; Code (the green button) is how you open it in GitHub Desktop", 5.8),
+  ...verify("Your fork's page says **forked from shivavashishtha/campusly** under its name, and shows the same number of commits."),
+  h2("0.3 Copy your fork to your computer"),
+  ...steps([
     "On **your fork's** page, click **Code → Open with GitHub Desktop**.",
-    "Choose a folder on your computer and click **Clone**.",
+    "GitHub Desktop shows where it will save the folder (usually Documents/GitHub/campusly). Note that place, then click **Clone**.",
     "Do **not** use \"Download ZIP\": it drops the history of commits, and Part 10 uses that history.",
   ]),
-  ...fig(DEP + "09-github-repo-public.jpg", "The public repository: Fork is at the top right, Code → Open with GitHub Desktop is the green button", 5.8),
-  ...verify("Your fork's page says **forked from shivavashishtha/campusly** under its name, and shows the same number of commits."),
-  h2("0.3 Open it in Claude Code and run the Orient prompt"),
-  p("Open the cloned folder in Claude Code. Claude automatically reads **CLAUDE.md**, the project's briefing file. Then send this prompt:"),
-  ...promptBox("EXPLORE", "0.3", "Orient: set up and run Campusly", {
-    Context: "I have just cloned my fork of the public Campusly repository (github.com/shivavashishtha/campusly). I am new to coding.",
+  h2("0.4 Create the project in Claude Code"),
+  ...steps([
+    "Open the Claude desktop app and go to the **Code** tab.",
+    "Start a new session and, when it asks for a folder, choose the **campusly** folder from 0.3. That folder is now your project: every prompt in this guide is sent in a session opened on it.",
+    "Claude reads **CLAUDE.md**, the project's briefing file, by itself. You don't need to paste it.",
+    "When Claude asks permission to run something (installing packages, starting the app, running tests), read the one-line reason and allow it. Say no to anything that wants to delete files outside the campusly folder or asks for a password.",
+  ]),
+  ...box("NO GITHUB DESKTOP?", "Open a Claude Code session on an empty folder and ask Claude: *Clone https://github.com/<your-username>/campusly into this folder, then open it.* Then start a new session on the campusly folder it creates. You may need to sign in to GitHub later, when you save your work (Part 11)."),
+  h2("0.5 Orient prompt: set up and run"),
+  p("This is the first message you send in the new project:"),
+  ...promptBox("EXPLORE", "0.5", "Orient: set up and run Campusly", {
+    Context: "This folder is my fork of the public Campusly repository (github.com/shivavashishtha/campusly). I am new to coding and I will do everything through this chat.",
     Goal: "Install what is needed, start the app, and explain in five short bullet points what Campusly is.",
     Rules: "Follow CLAUDE.md and the README.",
-    Constraints: "Do not change any code. If Node.js is missing, tell me how to install it instead of trying workarounds. Never ask me to paste passwords or keys into the chat.",
+    Constraints: "Do not change any code. If Node.js is missing, tell me how to install it from nodejs.org instead of trying workarounds. Never ask me to paste passwords or keys into the chat.",
     Proof: "The app runs at http://localhost:3000, and you tell me which demo account to sign in with.",
   }),
-  h2("0.4 Sign in"),
+  p("The first run takes a few minutes: Claude installs the packages, creates the demo schools and starts the app. **Keep this session open while you use the app**; if you close it, ask Claude to start the app again."),
+  h2("0.6 Sign in"),
   ...steps([
-    "Open **http://localhost:3000** and click **Sign in**.",
+    "Open **http://localhost:3000** in your browser and click **Sign in**.",
     "Use **principal@example.com** with password **campusly-demo-1** (every demo account uses this password; all people are fictional).",
     "Choose **Maple Grove School**.",
   ]),
   ...fig(IMG + "s04-school-picker.png", "After signing in as the principal: two schools to choose from"),
   ...verify("You see the Maple Grove dashboard with **12 students**, **1 / 3** classes marked today and **$3,455.00** fees outstanding. If not, see Part 12."),
-  h2("0.5 Compare with the live app"),
-  p("The same code runs on the internet at **https://campusly.13-127-195-244.sslip.io**. Open it on your phone and sign in with the same account. Sign-up is closed there on purpose (it's a shared classroom demo), and the demo data is reset before each class. Your local copy is yours to change; the live one is not."),
+  h2("0.7 Compare with the live app"),
+  p("The same code runs on the internet at **https://campusly.13-127-195-244.sslip.io**. Open it on your phone and sign in with the same account. Sign-up is closed there on purpose (it's a shared classroom demo), and the demo data is reset before each class. Your copy in Claude Code is yours to change; the live one is not."),
 );
 
 // ── Part 1 · The method ───────────────────────────────────────────────────────
@@ -263,8 +276,9 @@ add(
     ["", "Explore prompt (Parts 0, 2–10, 13)", "Build prompt (Part 11)"],
     [
       ["Purpose", "Understand what is already built", "Add something new"],
+      ["Where you send it", "The Claude Code chat, in your campusly project", "The Claude Code chat, in your campusly project"],
       ["Changes files?", "**Never.** Always says \"Do not change any files\"", "Yes, on a separate branch"],
-      ["What Claude returns", "Evidence: file names, the relevant lines, a command you can run", "A plan, then code, tests and a summary"],
+      ["What Claude returns", "Evidence: file names, the relevant lines, and the result of anything it ran", "A plan, then code, tests and a summary"],
       ["You finish by", "Ticking the checklist and doing the VERIFY step", "Checking the Proof line yourself"],
     ],
     [1900, 3563, 3563],
@@ -309,7 +323,7 @@ add(
   ]),
   h2("2.4 See it in the app"),
   ...fig(IMG + "s05-dashboard-principal.png", "Signed in as the principal: the four modules appear as tabs"),
-  ...verify("Open `docs/research/SPEC.md` and count the must-never lines. There should be **six**. Then read Entry 2 of `docs/DECISION_JOURNAL.md` to see the four questions that were asked."),
+  ...verify("Ask Claude: *Show me the must-never lines in docs/research/SPEC.md, numbered.* There should be **six**. Then ask: *Show me Entry 2 of docs/DECISION_JOURNAL.md.* You see the four questions that were asked."),
   ...decide("Who is the customer: one organisation, or many?", "If you will ever sell to a second organisation, every record needs to say which organisation owns it from day one (Campusly uses `school_id`).", "A tool for one organisation can skip this, but write that down as a decision so nobody adds a second customer by accident."),
 );
 
@@ -334,7 +348,7 @@ add(
     ["The roles × actions table (who may do what)", "docs/PLAN.md"],
     ["S-06 AC2 \"exactly one payment\" tested in two places", "tests/integration/exams-fees.test.ts and tests/e2e/journey.spec.ts"],
   ]),
-  ...verify("Run `pnpm vitest run tests/integration/exams-fees.test.ts`. All tests pass, including *double-click: the same idempotency key records exactly one payment*."),
+  ...verify("Ask Claude: *Run the exams and fees integration tests and tell me if the double-click payment test passes.* Claude reports that all of them pass, including *double-click: the same idempotency key records exactly one payment*."),
   ...decide("What goes below the cut line?", "Anything that needs an account you don't have yet, or that would double the build: payments, AI, a second module, a mobile app.", "If a buyer won't sign without it, move it above the line and move something else down. Record the change."),
 );
 
@@ -364,7 +378,7 @@ add(
   ...fig(IMG + "s03-brand-kits.png", "http://localhost:3000/dev/brand: four brand kits built from the real screens"),
   ...fig(IMG + "s03c-evergreen-top.png", "Evergreen, the chosen kit: the same screen in light and dark"),
   ...fig(IMG + "s14-dashboard-dark.png", "Click the moon (top-right) to switch to dark mode; the choice is remembered"),
-  ...verify("Click the sun/moon button on any page and reload: your choice stays. Then run `pnpm exec playwright test tests/e2e/theme.spec.ts` (first time: `pnpm exec playwright install chromium`). **2 passed.**"),
+  ...verify("Click the sun/moon button on any page and reload: your choice stays. Then ask Claude: *Run the browser tests for the theme toggle.* (The first time, Claude also installs the test browser.) Claude reports **2 passed**."),
   ...decide("What should a user feel in the first two seconds?", "Two adjectives you would defend to the buyer, such as \"friendly, trustworthy\". The colour and fonts follow from them.", "If you can't name two, put real screens side by side and let the buyer point."),
 );
 
@@ -391,7 +405,7 @@ add(
     ["Stand-ins: email goes to a local mail log; files to a local folder; no payment gateway", "src/lib/mail.ts, src/lib/files.ts"],
   ]),
   ...fig(IMG + "s20-mail-sink.png", "http://localhost:3000/dev/mail: emails are never really sent; they appear here"),
-  ...verify("Run `pnpm typecheck` then `pnpm lint`. Both finish **with no errors**. Then open the **Actions** tab of https://github.com/shivavashishtha/campusly: the latest run has a green tick."),
+  ...verify("Ask Claude: *Run the type check and the linter, and tell me if there are any errors.* Claude reports **no errors**. Then open the **Actions** tab of https://github.com/shivavashishtha/campusly: the latest run has a green tick."),
   ...box("A REAL CI FAILURE FROM THIS BUILD", "For the first few pushes, every CI run failed in its first step and **no checks ran at all**: the pnpm version was written in two places (the workflow file and package.json), and the setup step refused to guess. The fix was deleting one line. Lesson: a red cross that nobody reads protects nothing. Check the Actions tab after you push.", WARN, WARN_INK),
   ...decide("Which technology stack?", "The most boring, popular option that runs on everyone's machine without extra installs. AI writes popular tools best.", "If everyone already has Docker, a separate Postgres database is fine. If a client requires a stack, keep the playbook; only the commands change."),
 );
@@ -419,8 +433,9 @@ add(
     ["Money is stored in whole cents, never decimals; \"today\" is the school's date", "src/lib/money.ts, src/lib/time.ts"],
     ["Uploads are checked by their real contents, not their file name", "src/lib/files.ts"],
   ]),
-  ...code(["$ pnpm vitest run tests/unit", " Test Files  5 passed (5)", "      Tests  20 passed (20)"]),
-  ...verify("Run `pnpm vitest run tests/unit`. **20 passed.** Then ask Claude: *why does tests/unit/money.test.ts check 0.29?* (Hint: type `0.29 * 100` into a JavaScript console.)"),
+  label("WHAT CLAUDE REPORTS"),
+  ...code(["Test Files  5 passed (5)", "     Tests  20 passed (20)"]),
+  ...verify("Ask Claude: *Run the unit tests.* **20 passed.** Then ask: *Why does tests/unit/money.test.ts check 0.29? Show me what 0.29 × 100 gives in JavaScript.*"),
   ...decide("What counts as a foundation?", "Anything every feature would otherwise reinvent slightly differently: data separation, permissions, logging, money, dates, email.", "If only one feature needs it, build it inside that feature."),
 );
 
@@ -469,7 +484,7 @@ add(
     Goal: "Explain the four test layers and how many tests each has; explain the authorization matrix in plain words; summarise what the security review found and what happened to each finding; and list the bugs the tests caught before any user saw them.",
     Rules: "PLAYBOOK §15.",
     Constraints: "Do not change any files.",
-    Proof: "You run `pnpm test` and report the totals.",
+    Proof: "You run all the tests and report the totals.",
   }),
   h2("8.3 What Claude should show you"),
   ...checklist([
@@ -478,15 +493,16 @@ add(
     ["13 security findings: 11 fixed, 1 deferred to deployment, 1 accepted with a reason", "docs/DECISION_JOURNAL.md Entry 6, tests/integration/redteam.test.ts"],
     ["3 bugs caught before release, each turned into a rule", "docs/INCIDENT_RULES.md"],
   ]),
-  ...code(["$ pnpm test", " Test Files  11 passed (11)", "      Tests  130 passed (130)"]),
+  label("WHAT CLAUDE REPORTS"),
+  ...code(["Test Files  11 passed (11)", "     Tests  130 passed (130)"]),
   h2("8.4 Try the sabotage test yourself"),
   p("This is the most convincing minute of the course: break a safety rule on purpose and watch the tests catch it. This prompt **does** change a file, then puts it back."),
   ...promptBox("BUILD", "8.4", "Break one rule on purpose, then undo it", {
     Context: "Campusly repository; tests currently pass.",
-    Goal: "In src/lib/services/students.ts, make visibleStudents() let teachers see every student, run `pnpm test`, show me which tests fail, then undo the change with `git restore` and run the tests again.",
+    Goal: "In src/lib/services/students.ts, make visibleStudents() let teachers see every student, run all the tests, show me which tests fail, then undo the change and run the tests again.",
     Rules: "Must-never #2 and #3 (people only see their own students).",
     Constraints: "Change only that one line; restore it afterwards.",
-    Proof: "First run: 2 tests fail. After restoring: all 130 pass, and `git status` shows no changes.",
+    Proof: "First run: 2 tests fail. After undoing: all 130 pass, and no changed files are left.",
   }),
   ...verify("You saw tests named *lists never leak across schools or roles* and *teachers see only their own classes and students* fail, then pass again."),
   ...decide("Which tests do I write first?", "One for each must-never line, then one for the journey a real user takes from start to finish.", "If a reviewer's finding is about *who should be allowed* to do something, it is a product decision: take it to the founder."),
@@ -510,7 +526,7 @@ add(
     ["11 accounts across 2 schools, all with password campusly-demo-1", "scripts/seed.ts, README.md"],
     ["A teacher and a parent with nothing linked, to show the empty screens", "newteacher@, newparent@example.com"],
     ["A principal who belongs to both schools", "principal@example.com"],
-    ["Reset everything: stop the app, then `pnpm seed:reset`", "package.json"],
+    ["Reset everything: ask Claude *Stop the app, reset the demo data, then start it again*", "package.json (the seed:reset script)"],
   ]),
   ...verify("Sign in as **newteacher@example.com**: the dashboard says *You don't teach any class yet*. The full list of accounts is in Appendix C."),
   ...decide("What makes good demo data?", "Every status a real user will meet: paid, partly paid and overdue; marked and not marked; a student with no class; an account with nothing linked.", "If your demo only shows the happy path, your first real user finds the empty screens for you."),
@@ -527,17 +543,17 @@ add(
     Goal: "Explain what each file in docs/ is for, what CLAUDE.md tells you, and walk me through the commit history in order, saying which playbook stage each commit belongs to.",
     Rules: "PLAYBOOK §2.8 (write it down where the next session will find it).",
     Constraints: "Do not change any files.",
-    Proof: "You run `git log --oneline --reverse` and map every commit to a stage.",
+    Proof: "You list every commit, oldest first, and map each one to a stage.",
   }),
   h2("10.3 What Claude should show you"),
   ...checklist([
     ["The playbook and the AI briefing file", "PLAYBOOK.md, CLAUDE.md"],
     ["Decisions, plan, decision journal, engineering guide, runbook, incident rules, notes, deployment guide", "docs/ (DEPLOY_AWS.md for the deployment)"],
     ["The server scripts", "deploy/"],
-    ["One commit per stage, oldest first, starting with \"Stage 1–2: research, decision journal…\", then the deployment commits", "git log"],
+    ["One commit per stage, oldest first, starting with \"Stage 1–2: research, decision journal…\", then the deployment commits", "The commit history"],
     ["The next step for the project", "docs/NOTES.md (top)"],
   ]),
-  ...verify("Run `git log --oneline --reverse`. The first commit is *Stage 1–2: research, decision journal, locked decisions, phase-1 plan*. Your fork has exactly the same history as the original; GitHub shows *This branch is up to date with shivavashishtha/campusly:main*."),
+  ...verify("Ask Claude: *List the commits, oldest first.* The first one is *Stage 1–2: research, decision journal, locked decisions, phase-1 plan*. Your fork has exactly the same history as the original; GitHub shows *This branch is up to date with shivavashishtha/campusly:main*."),
   ...decide("Should the repository be public or private?", "Public if nothing in it is secret and you want free protection of the main branch. Private if the code is commercial.", "Campusly chose **public** (decision D-018): students fork it with no invitations, and the server downloads it with no token. Before going public, the whole history was checked for secrets; a file deleted later still sits in old commits."),
 );
 
@@ -548,15 +564,16 @@ add(
   p("Now you change the code, in **your fork**. Every Build prompt follows the same five lines, and names the rules from Parts 2–8 that the new feature must respect. Your changes never touch the instructor's repository or the live app."),
   h2("11.1 Before every feature"),
   ...steps([
-    "Make sure the app's tests pass: `pnpm test`.",
+    "Ask Claude: *Run all the tests and tell me if they pass.* Start a feature only from a green state.",
     "Ask Claude: *Create a new git branch called feature/<short-name> and switch to it.*",
     "Send the Build prompt. **Read the plan Claude shows you** before saying \"go\". If something in it changes what users see and the prompt didn't decide it, Claude should ask you.",
   ]),
   h2("11.2 After every feature"),
   ...steps([
     "Check the **Proof** line yourself in the app.",
-    "Ask Claude: *Run pnpm typecheck, pnpm lint and pnpm test, then commit with a message that says what was verified.*",
-    "Ask Claude: *Push the branch to my fork and open a pull request into my fork's main branch.* (Or use GitHub Desktop: **Push origin**, then **Create Pull Request**, and choose **your fork** as the base, not the instructor's repository.)",
+    "Ask Claude: *Run the type check, the linter and all the tests, then commit with a message that says what was verified.*",
+    "Ask Claude: *Push this branch to my fork and give me the link to open a pull request into my fork's main branch.* Open the link and click **Create pull request**. Check the base is **your fork**, not the instructor's repository.",
+    "If Claude says it can't sign in to GitHub, open GitHub Desktop: it shows your branch, so click **Push origin** there, then come back to the chat.",
   ]),
   ...table(
     ["Feature", "Size", "Main skill it practises"],
@@ -575,14 +592,14 @@ add(
 );
 
 const features = [
-  ["11.3", "Class notice board", "Teachers post notices to the classes they teach; admins post to any class or the whole school; parents and students see the notices for their children's or their own class on the dashboard.", "Must-never #1–#3 (each school, class and family sees only its own notices); one permission check in src/lib/can.ts.", "New table with school_id and a database migration (`pnpm db:generate --name notices`); follow the module pattern in docs/ENGINEERING_GUIDE.md; audit every post; titles max 120 characters, text max 2,000; brand tokens only.", "A teacher posts to Grade 5-A; parent@example.com sees it on the dashboard for Leo but not for Mia (Grade 6-B); a teacher cannot post to a class they don't teach (a test proves it); new rows added to the authorization matrix; all tests pass."],
+  ["11.3", "Class notice board", "Teachers post notices to the classes they teach; admins post to any class or the whole school; parents and students see the notices for their children's or their own class on the dashboard.", "Must-never #1–#3 (each school, class and family sees only its own notices); one permission check in src/lib/can.ts.", "New table with school_id and a reviewed database migration (CLAUDE.md, Schema change); follow the module pattern in docs/ENGINEERING_GUIDE.md; audit every post; titles max 120 characters, text max 2,000; brand tokens only.", "A teacher posts to Grade 5-A; parent@example.com sees it on the dashboard for Leo but not for Mia (Grade 6-B); a teacher cannot post to a class they don't teach (a test proves it); new rows added to the authorization matrix; all tests pass."],
   ["11.4", "Archive a student", "Staff can archive a student who has left. Archived students disappear from lists, attendance and billing, but their record, marks and invoices stay readable, and staff can restore them.", "Must-never #1 (scoped to the school); only staff may archive (can()).", "Do not delete any data; add an archived date rather than removing rows; existing invoices are unchanged; audit archive and restore.", "Archive Kai Müller: he disappears from the students list and from billing a class; his page is still reachable by staff with an \"Archived\" badge; restore brings him back; tests cover both."],
   ["11.5", "Attendance export to CSV", "Staff and the class teacher can download a class's attendance for a date range as a CSV file.", "Teachers only for their own classes; must-never #1.", "Escape any cell that starts with =, +, - or @ so spreadsheets can't run it as a formula; dates in the school's timezone; no new database tables.", "First admit a test student named \"=SUM(1)\" into Grade 5-A. Download Grade 5-A for the last two weeks and open it in a spreadsheet: one row per student per day, and \"=SUM(1)\" shows as plain text, not a formula; a teacher cannot export Grade 6-B (test)."],
   ["11.6", "Printable report card", "A clean, printable report card page for a student, with the school name, the student, every exam with percentage, the overall percentage and attendance.", "The same visibility as the report card: staff, the class teacher, the student's parents and the student only.", "Use the existing report-card data, not new calculations; print styles only (no PDF library); readable in black and white; no navigation or buttons on paper.", "As parent@example.com, open Leo's printable report card and print preview it: one A4 page, overall 75%; opening Aisha's printable card gives Not found."],
   ["11.7", "Absence alerts for parents", "When a student is marked absent, their parents get an in-app notification (a bell with a count) the next time they open Campusly. Email is not part of this feature.", "Parents see only alerts about their own children; must-never #4 (no real email is sent).", "New notifications table with school_id; created in the same step as saving attendance; saving the same absence twice must not create two alerts; mark as read.", "Mark Leo absent today as teacher@example.com; parent@example.com sees one alert; saving attendance again does not add a second; parent2@example.com sees nothing."],
   ["11.8", "Timetable", "A weekly timetable per class (day, period, subject, teacher) that staff edit, teachers see for their classes, and parents and students see for their own class.", "Teachers only for classes they teach; must-never #1.", "**Before planning, ask me the decisions a school would notice, one at a time, with options and your recommendation:** how many periods per day, whether periods have fixed times, what happens when a teacher is booked twice. Record my answers in docs/DECISION_JOURNAL.md and docs/DECISIONS.md.", "The journal has a new entry with my answers; a teacher cannot be booked in two classes in the same period (test); parent@example.com sees Grade 5-A's timetable for Leo."],
   ["11.9", "Import students from a CSV file", "Staff upload a CSV of students (first name, last name, date of birth, class) and see a preview with problems marked before anything is saved.", "Only staff; the plan's student limit still applies; student codes are still unique.", "Either every row is saved or none is; reject wrong or missing columns with a clear message; accept names with accents, apostrophes and other scripts; handle a file saved from Excel (UTF-8 with a BOM); maximum 500 rows.", "Import a file of 5 students with one bad date: the preview flags that row and nothing is saved; fix it and import: 5 new students with the next STU codes; a test covers the all-or-nothing rule."],
-  ["11.10", "AI report-card comments", "On a student's report card, staff and the class teacher can click \"Draft comment\". Claude drafts a short, encouraging comment from the marks and attendance; the teacher edits and approves it before anyone else sees it.", "PLAYBOOK Stage 7: AI output is a draft that a human approves; only marks and attendance are sent, with no names or contact details; teachers only for their own classes.", "Read the API key from `ANTHROPIC_API_KEY` in .env (I add it myself; never ask me to paste it into the chat); put the model name in an environment setting, not in the code; if there is no key, show a clearly labelled sample draft; record each call (who, when, how long it took) without storing the student's data in the log; label approved comments \"AI-assisted\".", "With no key, the button shows a labelled sample draft; with a key, a real draft appears in a few seconds; nothing is visible to parents until the teacher approves it; a test proves a teacher can't draft for another class."],
+  ["11.10", "AI report-card comments", "On a student's report card, staff and the class teacher can click \"Draft comment\". Claude drafts a short, encouraging comment from the marks and attendance; the teacher edits and approves it before anyone else sees it.", "PLAYBOOK Stage 7: AI output is a draft that a human approves; only marks and attendance are sent, with no names or contact details; teachers only for their own classes.", "Read the API key from `ANTHROPIC_API_KEY` in .env: create that line empty, and I will paste the key into the file myself in a text editor (never ask me to paste it into the chat); put the model name in an environment setting, not in the code; if there is no key, show a clearly labelled sample draft; record each call (who, when, how long it took) without storing the student's data in the log; label approved comments \"AI-assisted\".", "With no key, the button shows a labelled sample draft; with a key, a real draft appears in a few seconds; nothing is visible to parents until the teacher approves it; a test proves a teacher can't draft for another class."],
 ];
 for (const [id, title, goal, rules, constraints, proof] of features) {
   add(
@@ -598,16 +615,18 @@ add(
   ...table(
     ["What you see", "Why", "What to do"],
     [
-      ["`pnpm: command not found`", "pnpm isn't switched on yet", "Run `corepack enable`, or ask Claude to install pnpm"],
-      ["The page at localhost:3000 doesn't open", "The app isn't running", "Run `pnpm dev` and wait for \"Ready\""],
+      ["Claude says Node.js is missing or too old", "Node.js 22 isn't installed", "Install the **LTS** version from nodejs.org, then start a new Claude Code session on the campusly folder"],
+      ["Claude says pnpm is not found", "pnpm isn't switched on yet", "Ask Claude: *Set up pnpm the way CLAUDE.md says, then try again.*"],
+      ["The page at localhost:3000 doesn't open", "The app isn't running (for example, the session that started it was closed)", "Ask Claude: *Start the app and tell me when it's ready.*"],
       ["Sign-in says \"Too many attempts\"", "Sign-in is limited to 5 tries a minute (a security rule)", "Wait one minute and try again"],
-      ["`pnpm seed:reset` fails or the data looks broken", "The app is still running and holding the database", "Stop `pnpm dev` first, then run it again"],
-      ["Browser tests fail before starting", "The test browser isn't installed", "Run `pnpm exec playwright install chromium`"],
+      ["Resetting the demo data fails, or the data looks broken", "The app is still running and holding the database", "Ask Claude: *Stop the app, reset the demo data, then start it again.*"],
+      ["Browser tests fail before starting", "The test browser isn't installed", "Ask Claude: *Install the test browser, then run the browser tests again.*"],
+      ["Claude asks permission to run something", "Claude Code asks before running commands", "Read the reason. Allow installs, tests and starting the app; refuse anything outside the campusly folder or anything asking for a password"],
       ["A Build prompt's plan changes something users see that you didn't decide", "The prompt left a decision open", "Stop. Decide it yourself, or ask Claude for options and a recommendation"],
       ["Tests fail after your feature", "The new code broke an existing rule", "Ask Claude to explain the failing test before changing anything; never weaken a test to make it pass"],
       ["Push fails with *Permission denied* or *403*", "You cloned the instructor's repository instead of your fork", "Fork it (Part 0.2), then ask Claude: *point origin at my fork, github.com/<your-username>/campusly, and push again*"],
       ["On the live app, *Create an account* says sign-ups are closed", "The live app is a shared classroom demo (decision D-015)", "Sign in with a demo account; to try sign-up, use your local copy (emails appear at localhost:3000/dev/mail)"],
-      ["You changed something by accident", "", "Ask Claude: *show me git status, then restore the files I didn't mean to change*"],
+      ["You changed something by accident", "", "Ask Claude: *Show me which files changed, then undo the changes I didn't mean to make.*"],
     ],
     [3000, 3013, 3013],
   ),
@@ -629,7 +648,7 @@ add(
     ["The installer: swap memory, Node.js 22, Caddy, an app user, a secret generated **on the server**, seed, build, start", "deploy/install.sh"],
     ["Every boot: the address campusly.<ip-with-dashes>.sslip.io, the settings file (including DEMO_MODE=1) and HTTPS", "deploy/configure.sh"],
     ["The app restarts by itself if it crashes", "deploy/campusly.service"],
-    ["Updating and resetting the live app: sudo campusly-update, sudo campusly-reset-demo", "deploy/update.sh, deploy/reset-demo.sh"],
+    ["Updating and resetting the live app (the instructor's campusly-update and campusly-reset-demo)", "deploy/update.sh, deploy/reset-demo.sh"],
     ["The decisions: demo mode, EC2, public repository; the Lightsail attempt superseded", "docs/DECISIONS.md D-015 to D-018, docs/DECISION_JOURNAL.md Entry 10"],
   ]),
   ...verify("Open **https://campusly.13-127-195-244.sslip.io**: the address bar shows a padlock. Sign in as **teacher@example.com**: you see Grade 5-A, the same as on your machine."),
@@ -702,13 +721,13 @@ add(
   h2("13.8 Go live"),
   ...steps([
     "Wait about 10 minutes while the server installs Node.js and Caddy, seeds the demo schools and builds the app.",
-    "To watch: instance → **Connect → EC2 Instance Connect → Connect**, then type **sudo tail -n 20 /var/log/campusly-install.log**. It is done when the last line is **CAMPUSLY READY**.",
+    "The instructor watches it in AWS's browser terminal (instance → **Connect → EC2 Instance Connect → Connect**) by reading the install log. It is done when the last line is **CAMPUSLY READY**.",
     "Open **https://campusly.13-127-195-244.sslip.io** and sign in with a demo account.",
   ]),
   ...fig(DEP + "16-live-site.jpg", "Campusly live on EC2, with automatic HTTPS", 5.8),
   ...verify("The address opens with a padlock (HTTPS), and **principal@example.com** / **campusly-demo-1** signs in."),
   h2("13.9 Updating the live site"),
-  p("After pushing changes to GitHub: instance → Connect → EC2 Instance Connect, then type **sudo campusly-update**. It pulls the code, rebuilds and restarts in 2–3 minutes and keeps the data. **sudo campusly-reset-demo** restores the demo data."),
+  p("The live app belongs to the instructor. After pushing changes to the original repository, the instructor opens AWS's browser terminal (EC2 Instance Connect) and runs the update script, **campusly-update**: it pulls the code, rebuilds and restarts in 2–3 minutes and keeps the data. **campusly-reset-demo** restores the demo data before each class. Your own changes stay in your fork and on your machine."),
   p("The full click-by-click record is in docs/DEPLOY_AWS.md."),
 );
 
