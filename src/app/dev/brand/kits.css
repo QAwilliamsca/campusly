@@ -63,3 +63,36 @@
   --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
   --focus: #b79cff; --shadow: none;
 }
+
+/* 5 — Ocean & Amber: from the founder's Coolors palette 8ecae6 · 219ebc · 023047 · ffb703 · fb8500.
+   Navy leads in light mode, amber in dark; sky and blue are the soft fills and focus ring. */
+.kit-ocean {
+  --accent: #023047; --accent-hover: #034a6b; --accent-fg: #ffffff; --accent-soft: #e2f3fa;
+  --bg: #f4f9fc; --surface: #ffffff; --surface-2: #e6f2f8; --border: #cfe5f0; --text: #0b1d28; --muted: #476272;
+  --success: #1d6b3a; --success-soft: #e5f4ea; --warn: #9a4d00; --warn-soft: #fff1d6; --danger: #b3261e; --danger-soft: #fceae8;
+  --focus: #219ebc; --radius: 14px; --control-radius: 10px; --shadow: 0 1px 3px rgb(2 48 71 / 0.07), 0 4px 12px rgb(2 48 71 / 0.05);
+  --font-body: var(--f-inter); --font-display: var(--f-jakarta);
+}
+.kit-ocean[data-mode="dark"] {
+  --accent: #ffb703; --accent-hover: #ffc93d; --accent-fg: #023047; --accent-soft: #2e2408;
+  --bg: #011722; --surface: #03222f; --surface-2: #062c3d; --border: #0e3d52; --text: #e8f4fa; --muted: #9ec3d4;
+  --success: #74d99f; --success-soft: #13301f; --warn: #fb8500; --warn-soft: #2f1c05; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #8ecae6; --shadow: none;
+}
+
+/* 6 — Soft Dashboard: from the founder's Dribbble reference (SM Info). Light grey page, white cards with big
+   rounded corners and soft shadows, orange lead, purple focus. The reference's #fd9a5c orange fails contrast with
+   white text (2.1:1), so light mode uses a deeper orange; the bright orange returns in dark mode. */
+.kit-soft {
+  --accent: #b9480a; --accent-hover: #9a3c08; --accent-fg: #ffffff; --accent-soft: #fff0e6;
+  --bg: #f4f5f8; --surface: #ffffff; --surface-2: #f1f2f6; --border: #e6e8ef; --text: #1f2433; --muted: #5f6577;
+  --success: #1d6b3a; --success-soft: #e5f4ea; --warn: #8d4a06; --warn-soft: #fff1dc; --danger: #b3261e; --danger-soft: #fdecea;
+  --focus: #8075dd; --radius: 24px; --control-radius: 14px; --shadow: 0 4px 24px rgb(31 36 51 / 0.06);
+  --font-body: var(--f-jakarta); --font-display: var(--f-jakarta);
+}
+.kit-soft[data-mode="dark"] {
+  --accent: #ff9b5e; --accent-hover: #ffb385; --accent-fg: #2a1203; --accent-soft: #3a2214;
+  --bg: #12141c; --surface: #1a1d27; --surface-2: #222633; --border: #2c3040; --text: #eceef4; --muted: #a5abbd;
+  --success: #74d99f; --success-soft: #13301f; --warn: #f5c06b; --warn-soft: #33260f; --danger: #ff9b91; --danger-soft: #3b1714;
+  --focus: #b3abff; --shadow: none;
+}

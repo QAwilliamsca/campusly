@@ -28,5 +28,5 @@ test("first visit follows the OS setting; a click switches and is remembered", a
   await page.goto("/sign-in");
   expect(await theme(page)).toBe("light"); // remembered across pages, despite the dark OS setting
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(bg).toBe("rgb(246, 248, 245)"); // Evergreen light --bg
+  expect(bg).toBe("rgb(244, 249, 252)"); // Ocean & Amber light --bg (D-019)
 });

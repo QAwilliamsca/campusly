@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getDb } from "@/db/client";
 import { ActionForm, SubmitButton } from "@/components/ActionForm";
 import { Logo } from "@/components/Logo";
-import { Badge, Card } from "@/components/ui";
+import { Avatar, Badge, Card } from "@/components/ui";
 import { requireUser } from "@/lib/session";
 import { listMySchools } from "@/lib/services/schools";
 import { createSchoolAction } from "./actions";
@@ -21,14 +21,15 @@ export default async function Schools() {
         <span className="flex items-center gap-2 font-semibold"><Logo /> Campusly</span>
         <SignOut />
       </header>
-      <h1 className="text-2xl font-semibold">Hello, {user.name}</h1>
+      <h1 className="text-3xl font-bold">Hello, {user.name}</h1>
       <p className="mt-1 text-sm text-muted">Choose a school, or create a new one.</p>
 
       <div className="mt-6 space-y-3">
         {schools.length === 0 && <p className="text-sm text-muted">You aren&apos;t a member of any school yet. Create one below, or open the invite link you were sent.</p>}
         {schools.map((s) => (
-          <Link key={s.id} href={`/s/${s.slug}`} className="card flex items-center justify-between p-4 hover:bg-surface-2">
-            <span className="font-medium">{s.name}</span>
+          <Link key={s.id} href={`/s/${s.slug}`} className="card flex items-center gap-4 p-4 transition-colors hover:bg-surface-2">
+            <Avatar name={s.name} size="h-12 w-12 text-sm" />
+            <span className="min-w-0 flex-1 truncate text-lg font-semibold">{s.name}</span>
             <Badge tone="info">{s.role}</Badge>
           </Link>
         ))}

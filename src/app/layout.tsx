@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Fraunces, Nunito_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
-// Brand fonts (D-013 "Evergreen"), self-hosted by Next at build time. Tokens in globals.css use the variables.
-const body = Nunito_Sans({ subsets: ["latin", "latin-ext"], variable: "--f-nunito" });
-const display = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--f-fraunces" });
+// Brand font (D-019 "Ocean & Amber"), self-hosted by Next at build time. Tokens in globals.css use the variable.
+const body = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--f-jakarta" });
 
 // Runs before first paint so the page never flashes the wrong theme: saved choice, else the OS setting.
 // A fixed string (no user input), so inlining it is safe.
@@ -19,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: data-theme is set by THEME_SCRIPT before React hydrates.
-    <html lang="en" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
+    <html lang="en" className={body.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

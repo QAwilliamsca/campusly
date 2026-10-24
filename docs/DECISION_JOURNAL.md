@@ -265,3 +265,26 @@ guide the students that this is a public repo that they need to use."
   **a secret typed into a chat is a leaked secret.**
 - The EC2 wizard's "Confirm changes" dialog sits on top of the wizard's Cancel button; one stray click threw the
   form away. Lesson: one click, then one screenshot, before the next click.
+
+---
+## Entry 11: The founder redesigns the look (Stage 3 reopened again)
+
+**What happened:** the founder shared a Coolors palette, a Dribbble dashboard and a school-dashboard case study, and
+asked to see each as real screens before deciding. Claude added them as brand kits 5 and 6 at /dev/brand, then rebuilt
+the case study's admin dashboard with Campusly's own data, then every screen, at /dev/admin-sample, with a switch
+between palettes.
+
+| Question | Options shown | Claude recommended | Founder chose |
+|---|---|---|---|
+| Which colours? | Evergreen · Ocean & Amber (founder's palette) · Soft Dashboard · reference salmon | No preference: all pass contrast; shown side by side | **Ocean & Amber** |
+| Which layout? | Current top tabs · sidebar dashboard (as in the samples) | Show every screen first, then decide | **Sidebar, as in the samples**: "recreate the whole application" |
+
+**What Claude adjusted, and why (technical, so Claude's call):**
+- The references used colours that fail contrast (white text on salmon or bright orange, 2.1:1). Light mode uses navy
+  text on amber buttons instead; every text pair is at least 4.5:1.
+- Widgets in the references that Campusly has no data for (complaints, transport, expenses) became Campusly widgets
+  (needs attention, classes, invoices) rather than fake numbers.
+
+**Lesson for students:** a brand decision is cheap to reopen when colours live in tokens. Previewing real screens with
+real data made a five-minute decision possible.
+

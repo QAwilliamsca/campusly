@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { ActionForm, SubmitButton } from "@/components/ActionForm";
-import { Card, Empty, PageHeader, TableWrap } from "@/components/ui";
+import { Avatar, Card, Empty, Kpi, PageHeader } from "@/components/ui";
+import { Icon } from "@/components/Icon";
 import { ATTENDANCE } from "@/db/schema";
 import { hasAnyGrant } from "@/lib/can";
 import { requireCtx } from "@/lib/session";
@@ -44,7 +45,13 @@ export default async function Attendance({ params, searchParams }: { params: Pro
           <button className="btn-secondary">Show</button>
         </form>
       </PageHeader>
-      <Card>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Kpi label={`Students in ${cls.name}`} value={roster.length} icon={<Icon name="users" />} strong />
+        <Kpi label="Present" value={existing.filter((r) => r.status === "present").length} note={existing.length ? `on ${date}` : "Not marked yet"} icon={<Icon name="check" />} />
+        <Kpi label="Late" value={existing.filter((r) => r.status === "late").length} icon={<Icon name="list" />} />
+        <Kpi label="Absent" value={existing.filter((r) => r.status === "absent").length} icon={<Icon name="alert" />} />
+      </div>
+      <Card title={`${cls.name} · ${date}`}>
         {roster.length === 0 ? (
           <Empty title={`${cls.name} has no students`} hint="Admit students into this class first." />
         ) : (
@@ -52,26 +59,23 @@ export default async function Attendance({ params, searchParams }: { params: Pro
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="classId" value={cls.id} />
             <input type="hidden" name="date" value={date} />
-            <TableWrap>
-              <table className="data-table">
-                <thead><tr><th>Student</th>{ATTENDANCE.map((s) => <th key={s} className="capitalize">{s}</th>)}</tr></thead>
-                <tbody>
-                  {roster.map((s) => (
-                    <tr key={s.id}>
-                      <td><span className="font-medium">{s.firstName} {s.lastName}</span> <span className="font-mono text-xs text-muted">{s.code}</span></td>
-                      {ATTENDANCE.map((opt) => (
-                        <td key={opt}>
-                          <label className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center">
-                            <span className="sr-only">{s.firstName} {s.lastName}: {opt}</span>
-                            <input type="radio" name={`status:${s.id}`} value={opt} defaultChecked={(status.get(s.id) ?? "present") === opt} className="h-5 w-5 accent-accent" />
-                          </label>
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </TableWrap>
+            <ul className="space-y-2">
+              {roster.map((s) => (
+                <li key={s.id} className="tile flex flex-wrap items-center gap-3 p-3">
+                  <Avatar name={`${s.firstName} ${s.lastName}`} size="h-9 w-9 text-xs" />
+                  <span className="min-w-40 flex-1"><span className="block font-semibold">{s.firstName} {s.lastName}</span><span className="block font-mono text-xs text-muted">{s.code}</span></span>
+                  <span className="flex gap-1 rounded-control bg-surface p-1">
+                    {ATTENDANCE.map((opt) => (
+                      <label key={opt} className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-control px-3 text-sm font-medium text-muted ${opt === "absent" ? "has-checked:bg-danger-soft has-checked:text-danger" : opt === "late" ? "has-checked:bg-warn-soft has-checked:text-warn" : "has-checked:bg-cta has-checked:text-cta-fg"}`}>
+                        <input type="radio" name={`status:${s.id}`} value={opt} defaultChecked={(status.get(s.id) ?? "present") === opt} className="h-4 w-4 accent-accent" />
+                        <span className="sr-only">{s.firstName} {s.lastName}: {opt}</span>
+                        <span aria-hidden="true" className="capitalize">{opt}</span>
+                      </label>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
             <div className="mt-4"><SubmitButton>Save attendance</SubmitButton></div>
           </ActionForm>
         )}

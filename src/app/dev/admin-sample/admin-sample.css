@@ -1,0 +1,88 @@
+/*
+ * Sample admin dashboard in the style of the founder's reference (warm off-white, salmon accent, slate calendar).
+ * Local design preview only, like /dev/brand: tokens live here, scoped to .acero, so nothing leaks into the product.
+ * Every text pair is WCAG AA (>= 4.5:1) in both themes.
+ */
+.acero {
+  --a-bg: #f7f5f2; --a-side: #fbfaf8; --a-surface: #ffffff; --a-surface-2: #f3f0ec; --a-border: #ece7e1;
+  --a-text: #2b2d3a; --a-muted: #6b6e7b;
+  --a-accent: #f4a37f; --a-accent-fg: #3d1a0a; --a-accent-text: #b4532a; --a-accent-soft: #fdeee6;
+  --a-slate: #565d8c; --a-slate-fg: #ffffff; --a-slate-muted: #dfe2f5; --a-slate-2: #6a71a0;
+  --a-paid: #d7f0d4; --a-paid-fg: #1d5c2a; --a-due: #fde3d6; --a-due-fg: #8a3510; --a-over: #fbe0de; --a-over-fg: #a3241b;
+  --a-shadow: 0 2px 14px rgb(43 45 58 / 0.05);
+  background: var(--a-bg); color: var(--a-text); font-family: var(--f-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-theme="dark"] .acero {
+  --a-bg: #15161c; --a-side: #191a21; --a-surface: #1d1f27; --a-surface-2: #252833; --a-border: #2d303c;
+  --a-text: #ecedf2; --a-muted: #a3a6b4;
+  --a-accent: #f4a37f; --a-accent-fg: #3d1a0a; --a-accent-text: #f4a37f; --a-accent-soft: #3d2316;
+  --a-slate: #2f3557; --a-slate-fg: #ffffff; --a-slate-muted: #c9cdea; --a-slate-2: #3b4270;
+  --a-paid: #163a20; --a-paid-fg: #8fe0a0; --a-due: #3d2316; --a-due-fg: #f7b495; --a-over: #3d1816; --a-over-fg: #ff9b91;
+  --a-shadow: none;
+}
+.acero h1, .acero h2 { font-family: inherit; }
+.acero .a-side { background: var(--a-side); border-right: 1px solid var(--a-border); }
+.acero .a-card { background: var(--a-surface); border: 1px solid var(--a-border); border-radius: 20px; box-shadow: var(--a-shadow); }
+.acero .a-tile { background: var(--a-surface-2); border-radius: 16px; }
+.acero .a-muted { color: var(--a-muted); }
+.acero .a-link { color: var(--a-accent-text); }
+.acero .a-nav { color: var(--a-muted); border-radius: 12px; }
+.acero .a-nav:hover { background: var(--a-surface-2); color: var(--a-text); }
+.acero .a-nav[aria-current="page"] { color: var(--a-accent-text); background: var(--a-accent-soft); font-weight: 600; box-shadow: inset -3px 0 0 var(--a-accent); }
+.acero .a-btn { background: var(--a-accent); color: var(--a-accent-fg); border-radius: 10px; font-weight: 600; }
+.acero .a-btn-ghost { border: 1px solid var(--a-border); background: var(--a-surface); color: var(--a-text); border-radius: 10px; }
+.acero .a-icon { background: var(--a-slate); color: var(--a-slate-fg); border-radius: 999px; }
+.acero .a-icon-soft { background: var(--a-surface-2); color: var(--a-muted); border-radius: 999px; }
+.acero .a-search { background: var(--a-surface-2); border-radius: 14px; color: var(--a-muted); }
+.acero .a-slate { background: var(--a-slate); color: var(--a-slate-fg); border-radius: 20px; }
+.acero .a-slate .a-slate-muted { color: var(--a-slate-muted); }
+.acero .a-seg { background: var(--a-surface); border-radius: 12px; }
+.acero .a-seg-on { background: var(--a-accent); color: var(--a-accent-fg); border-radius: 10px; font-weight: 600; }
+.acero .a-seg-off { color: var(--a-slate); font-weight: 600; }
+:root[data-theme="dark"] .acero .a-seg-off { color: var(--a-text); }
+.acero .a-day-marked { background: var(--a-slate-2); border-radius: 999px; }
+.acero .a-day-today { background: var(--a-accent); color: var(--a-accent-fg); border-radius: 999px; font-weight: 700; }
+.acero .a-pill { border-radius: 999px; font-weight: 600; font-size: 12px; padding: 4px 12px; white-space: nowrap; }
+.acero .a-paid { background: var(--a-paid); color: var(--a-paid-fg); }
+.acero .a-due { background: var(--a-due); color: var(--a-due-fg); }
+.acero .a-over { background: var(--a-over); color: var(--a-over-fg); }
+.acero .a-ring { box-shadow: 0 0 0 3px var(--a-surface), 0 0 0 5px var(--a-slate); }
+.acero .a-row + .a-row { border-top: 1px solid var(--a-border); }
+.acero a:focus-visible, .acero button:focus-visible { outline: 2px solid var(--a-accent-text); outline-offset: 2px; }
+
+/* Palette: the founder's Coolors colours (8ecae6 · 219ebc · 023047 · ffb703 · fb8500). Same layout, new tokens. */
+.acero.pal-ocean {
+  --a-bg: #f4f9fc; --a-side: #fafdff; --a-surface: #ffffff; --a-surface-2: #e6f2f8; --a-border: #d3e6f0;
+  --a-text: #0b1d28; --a-muted: #476272;
+  --a-accent: #ffb703; --a-accent-fg: #023047; --a-accent-text: #023047; --a-accent-soft: #fff4d6;
+  --a-slate: #023047; --a-slate-fg: #ffffff; --a-slate-muted: #8ecae6; --a-slate-2: #0d5578;
+  --a-paid: #d7f0d4; --a-paid-fg: #1d5c2a; --a-due: #fff1d6; --a-due-fg: #8a4a00; --a-over: #ffe6cc; --a-over-fg: #9a3c00;
+  --a-shadow: 0 2px 14px rgb(2 48 71 / 0.07);
+}
+:root[data-theme="dark"] .acero.pal-ocean {
+  --a-bg: #011722; --a-side: #021b28; --a-surface: #03222f; --a-surface-2: #062c3d; --a-border: #0e3d52;
+  --a-text: #e8f4fa; --a-muted: #9ec3d4;
+  --a-accent: #ffb703; --a-accent-fg: #023047; --a-accent-text: #ffb703; --a-accent-soft: #2e2408;
+  --a-slate: #0a3a55; --a-slate-fg: #ffffff; --a-slate-muted: #8ecae6; --a-slate-2: #155f84;
+  --a-paid: #163a20; --a-paid-fg: #8fe0a0; --a-due: #2e2408; --a-due-fg: #ffc93d; --a-over: #3a1f05; --a-over-fg: #fb8500;
+  --a-shadow: none;
+}
+
+/* Palette: Evergreen, Campusly's current brand (D-013). */
+.acero.pal-evergreen {
+  --a-bg: #f6f8f5; --a-side: #fafbf9; --a-surface: #ffffff; --a-surface-2: #eef2ed; --a-border: #dbe3da;
+  --a-text: #16201c; --a-muted: #55635c;
+  --a-accent: #5fd3bd; --a-accent-fg: #04211c; --a-accent-text: #0b6e5f; --a-accent-soft: #e3f3ef;
+  --a-slate: #0b6e5f; --a-slate-fg: #ffffff; --a-slate-muted: #cfeee6; --a-slate-2: #08594d;
+  --a-paid: #e6f4ea; --a-paid-fg: #1f6f3a; --a-due: #fcf0dc; --a-due-fg: #8d4a06; --a-over: #fceae8; --a-over-fg: #b3261e;
+  --a-shadow: 0 1px 3px rgb(22 32 28 / 0.06), 0 4px 12px rgb(22 32 28 / 0.04);
+}
+:root[data-theme="dark"] .acero.pal-evergreen {
+  --a-bg: #0c1311; --a-side: #0f1715; --a-surface: #131c19; --a-surface-2: #1a2622; --a-border: #27352f;
+  --a-text: #e6efe9; --a-muted: #9fb1a8;
+  --a-accent: #5fd3bd; --a-accent-fg: #04211c; --a-accent-text: #5fd3bd; --a-accent-soft: #0f2e28;
+  --a-slate: #0f3b33; --a-slate-fg: #ffffff; --a-slate-muted: #bfe9df; --a-slate-2: #17574b;
+  --a-paid: #13301f; --a-paid-fg: #74d99f; --a-due: #33260f; --a-due-fg: #f5c06b; --a-over: #3b1714; --a-over-fg: #ff9b91;
+  --a-shadow: none;
+}
+.acero .a-switch[aria-current="true"] { background: var(--a-slate); color: var(--a-slate-fg); }

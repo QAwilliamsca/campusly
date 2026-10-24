@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ActionForm, SubmitButton } from "@/components/ActionForm";
-import { Badge, Card, Empty, PageHeader, TableWrap, pct } from "@/components/ui";
+import { Avatar, Badge, Card, Empty, PageHeader, TableWrap, pct } from "@/components/ui";
 import { can, hasAnyGrant, isStaff } from "@/lib/can";
 import { AppError } from "@/lib/errors";
 import { formatMoney } from "@/lib/money";
@@ -30,12 +30,67 @@ export default async function StudentPage({ params }: { params: Promise<{ slug: 
     staff ? listClasses(ctx) : [],
   ]);
 
+  const owed = invoices ? invoices.reduce((a, i) => a + i.amountMinor - i.paidMinor, 0) : null;
   return (
     <>
       <PageHeader title={`${st.firstName} ${st.lastName}`} description={`${st.code} · ${st.className ?? "No class"}${st.dateOfBirth ? ` · Born ${st.dateOfBirth}` : ""}`} />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+        <div className="space-y-6">
+          <section className="card p-5">
+            <div className="flex flex-col items-center text-center">
+              <span className="rounded-full p-1 ring-2 ring-panel"><Avatar name={`${st.firstName} ${st.lastName}`} size="h-20 w-20 text-2xl" /></span>
+              <p className="mt-3 text-sm text-muted">{st.className ?? "No class"}</p>
+            </div>
+            <dl className="mt-5 grid grid-cols-3 gap-3 text-center">
+              <div className="tile p-3"><dt className="text-xs text-muted">Attendance</dt><dd className="text-lg font-bold">{pct(att.percent)}</dd></div>
+              <div className="tile p-3"><dt className="text-xs text-muted">Overall marks</dt><dd className="text-lg font-bold">{pct(rc.overall)}</dd></div>
+              <div className="tile p-3"><dt className="text-xs text-muted">Fees due</dt><dd className="text-lg font-bold">{owed === null ? "—" : formatMoney(owed, ctx.school.currency)}</dd></div>
+            </dl>
+          </section>
+        {docs && (
+          <Card title="Documents">
+            {docs.length === 0 ? <p className="text-sm text-muted">No documents uploaded.</p> : (
+              <ul className="space-y-2 text-sm">
+                {docs.map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-2">
+                    <a className="truncate font-medium text-accent hover:underline" href={d.url}>{d.filename}</a>
+                    <span className="shrink-0 text-muted">{Math.ceil(d.size / 1024)} KB</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <ActionForm action={uploadDocumentAction} encType="multipart/form-data" className="mt-4 flex flex-wrap items-end gap-3" resetOnSuccess>
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="studentId" value={st.id} />
+              <div className="min-w-0 flex-1">
+                <label className="label" htmlFor="file">Upload PDF, PNG or JPG (max 5 MB)</label>
+                <input id="file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required className="block w-full text-sm" />
+              </div>
+              <SubmitButton pendingText="Uploading…">Upload</SubmitButton>
+            </ActionForm>
+          </Card>
+        )}
+
+        {staff && (
+          <Card title="Edit details">
+            <ActionForm action={updateStudentAction} className="grid gap-4 sm:grid-cols-2">
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="id" value={st.id} />
+              <input type="hidden" name="version" value={st.version} />
+              <div><label className="label" htmlFor="firstName">First name</label><input id="firstName" name="firstName" defaultValue={st.firstName} required maxLength={100} className="input" /></div>
+              <div><label className="label" htmlFor="lastName">Last name</label><input id="lastName" name="lastName" defaultValue={st.lastName} required maxLength={100} className="input" /></div>
+              <div><label className="label" htmlFor="dateOfBirth">Date of birth</label><input id="dateOfBirth" name="dateOfBirth" type="date" defaultValue={st.dateOfBirth ?? ""} className="input" /></div>
+              <div>
+                <label className="label" htmlFor="classId">Class</label>
+                <select id="classId" name="classId" defaultValue={st.classId ?? ""} className="input"><option value="">— None —</option>{classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+              </div>
+              <div className="sm:col-span-2"><SubmitButton>Save changes</SubmitButton></div>
+            </ActionForm>
+          </Card>
+        )}
+        </div>
+        <div className="min-w-0 space-y-6">
         <Card title="Attendance">
-          <p className="text-3xl font-semibold">{pct(att.percent)}</p>
           <p className="text-sm text-muted">{att.marked === 0 ? "No days marked yet." : `${att.present} present · ${att.late} late · ${att.absent} absent of ${att.marked} day(s)`}</p>
           {att.recent.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2">
@@ -87,47 +142,7 @@ export default async function StudentPage({ params }: { params: Promise<{ slug: 
           </Card>
         )}
 
-        {docs && (
-          <Card title="Documents">
-            {docs.length === 0 ? <p className="text-sm text-muted">No documents uploaded.</p> : (
-              <ul className="space-y-2 text-sm">
-                {docs.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between gap-2">
-                    <a className="truncate font-medium text-accent hover:underline" href={d.url}>{d.filename}</a>
-                    <span className="shrink-0 text-muted">{Math.ceil(d.size / 1024)} KB</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <ActionForm action={uploadDocumentAction} encType="multipart/form-data" className="mt-4 flex flex-wrap items-end gap-3" resetOnSuccess>
-              <input type="hidden" name="slug" value={slug} />
-              <input type="hidden" name="studentId" value={st.id} />
-              <div className="min-w-0 flex-1">
-                <label className="label" htmlFor="file">Upload PDF, PNG or JPG (max 5 MB)</label>
-                <input id="file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required className="block w-full text-sm" />
-              </div>
-              <SubmitButton pendingText="Uploading…">Upload</SubmitButton>
-            </ActionForm>
-          </Card>
-        )}
-
-        {staff && (
-          <Card title="Edit details">
-            <ActionForm action={updateStudentAction} className="grid gap-4 sm:grid-cols-2">
-              <input type="hidden" name="slug" value={slug} />
-              <input type="hidden" name="id" value={st.id} />
-              <input type="hidden" name="version" value={st.version} />
-              <div><label className="label" htmlFor="firstName">First name</label><input id="firstName" name="firstName" defaultValue={st.firstName} required maxLength={100} className="input" /></div>
-              <div><label className="label" htmlFor="lastName">Last name</label><input id="lastName" name="lastName" defaultValue={st.lastName} required maxLength={100} className="input" /></div>
-              <div><label className="label" htmlFor="dateOfBirth">Date of birth</label><input id="dateOfBirth" name="dateOfBirth" type="date" defaultValue={st.dateOfBirth ?? ""} className="input" /></div>
-              <div>
-                <label className="label" htmlFor="classId">Class</label>
-                <select id="classId" name="classId" defaultValue={st.classId ?? ""} className="input"><option value="">— None —</option>{classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-              </div>
-              <div className="sm:col-span-2"><SubmitButton>Save changes</SubmitButton></div>
-            </ActionForm>
-          </Card>
-        )}
+        </div>
       </div>
     </>
   );

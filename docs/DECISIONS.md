@@ -94,7 +94,7 @@ Date: 2026-10-24   Decided by: Founder   Stage: 10 (red-team #4)
 Decision: Creating a 4th owned school is refused; uploads beyond the plan's storage are refused with a clear message.
 Storage limit lives on the plan row (`plan.storage_mb`) so pricing can change it without code.
 
-## D-013 — Brand kit: "Evergreen" (replaces D-007's "Calm & trustworthy")
+## D-013 — (Superseded by D-019) Brand kit: "Evergreen" (replaces D-007's "Calm & trustworthy")
 Date: 2026-10-24   Decided by: Founder   Stage: 3 (reopened by the founder, §21.14)
 Decision: Deep teal-green accent (#0b6e5f; dark #5fd3bd), soft sage neutrals, Fraunces headings, Nunito Sans body,
 18px cards and 12px controls. Name "Campusly" unchanged.
@@ -143,4 +143,15 @@ Reason: students need it without invitations; the server downloads it with no to
 secrets before switching (none: demo data only, secrets are generated on the server).
 Known risk: anyone can read the code. Nothing secret may ever be committed (CLAUDE.md rules already forbid it).
 Reopen only if: commercial code is added.
+
+## D-019 — New look: sidebar layout and the founder's "Ocean & Amber" palette (supersedes D-013)
+Date: 2026-10-24   Decided by: Founder   Stage: 3 (reopened)
+Decision: every signed-in screen uses a left sidebar (top tabs on phones) with a top bar, card-based dashboards per
+role, and the palette 8ecae6 · 219ebc · 023047 · ffb703 · fb8500: navy for links and brand panels, amber for primary
+buttons, sky and blue as soft fills. One font, Plus Jakarta Sans. Light and dark both pass WCAG AA.
+Options considered: keep Evergreen · Ocean & Amber · Soft Dashboard (Dribbble) · the reference salmon (all previewed
+as real screens at /dev/brand and /dev/admin-sample).
+Reason: the founder approved the sample screens and asked for the whole app in that style.
+Known cost: guide screenshots taken before this change show the old look.
+Affects: src/app/globals.css, src/app/layout.tsx, src/app/s/[slug]/layout.tsx, every page's markup, tests/e2e/theme.spec.ts.
 

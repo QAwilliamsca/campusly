@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthShell } from "@/components/AuthShell";
 import { ActionForm, SubmitButton } from "@/components/ActionForm";
 import { currentUser } from "@/lib/session";
 import { acceptInviteAction } from "@/app/schools/actions";
@@ -10,9 +11,9 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
   const user = await currentUser();
   const here = `/invite/${token}`;
   return (
-    <main className="grid min-h-dvh place-items-center px-4">
+    <AuthShell>
       <div className="card w-full max-w-sm p-6">
-        <h1 className="text-xl font-semibold">You&apos;ve been invited to Campusly</h1>
+        <h1 className="text-2xl font-bold">You&apos;ve been invited to Campusly</h1>
         {user ? (
           <>
             <p className="mt-2 text-sm text-muted">Signed in as <strong className="text-text">{user.email}</strong>. The invite must have been sent to this email.</p>
@@ -31,6 +32,6 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
           </>
         )}
       </div>
-    </main>
+    </AuthShell>
   );
 }

@@ -1,4 +1,5 @@
 import { AuthForm } from "@/components/AuthForm";
+import { AuthShell } from "@/components/AuthShell";
 import { googleEnabled } from "@/lib/auth";
 import { DEMO_ACCOUNTS, demoMode } from "@/lib/demo";
 import { safeNext } from "@/lib/session";
@@ -9,7 +10,7 @@ export const metadata = { title: "Sign in" };
 export default async function SignIn({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
   return (
-    <main className="grid min-h-dvh place-items-center gap-6 px-4 py-10">
+    <AuthShell>
       <AuthForm mode="sign-in" next={safeNext(next)} google={googleEnabled()} sinkHint={mailSinkEnabled()} />
       {demoMode() && (
         <section className="card w-full max-w-sm p-5" aria-labelledby="demo-accounts">
@@ -27,6 +28,6 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<{
           </ul>
         </section>
       )}
-    </main>
+    </AuthShell>
   );
 }

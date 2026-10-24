@@ -16,9 +16,11 @@ const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--f-grotesk" });
 
 const KITS = [
   { id: "ink", name: "1 · Ink & Paper", mood: "Refined version of today's look. Academic and trustworthy: ink-blue, warm paper, serif headings (Source Serif + Inter)." },
-  { id: "evergreen", name: "2 · Evergreen (chosen, D-013)", mood: "Friendly and natural: deep teal-green, soft rounded cards, warm serif headings (Fraunces + Nunito Sans)." },
+  { id: "evergreen", name: "2 · Evergreen (D-013, replaced by D-019)", mood: "Friendly and natural: deep teal-green, soft rounded cards, warm serif headings (Fraunces + Nunito Sans)." },
   { id: "sunrise", name: "3 · Sunrise", mood: "Warm and energetic: coral-orange, pill buttons, big rounded cards (Plus Jakarta Sans)." },
   { id: "slate", name: "4 · Slate & Violet", mood: "Bold and modern: near-black neutrals, violet accent, tight corners (Space Grotesk + Inter)." },
+  { id: "ocean", name: "5 · Ocean & Amber (chosen, D-019)", mood: "Calm and confident: deep navy with sky-blue fills in light mode, amber in dark mode, orange for warnings (Plus Jakarta Sans + Inter). Palette 8ecae6 · 219ebc · 023047 · ffb703 · fb8500." },
+  { id: "soft", name: "6 · Soft Dashboard (from your Dribbble reference)", mood: "Bright and friendly: light grey page, white cards with big rounded corners and soft shadows, orange lead, purple focus ring (Plus Jakarta Sans). Light mode uses a deeper orange than the reference so white button text stays readable." },
 ];
 
 /** Stage 3 brand directions shown as real screens (PLAYBOOK §8.4). Local only. */

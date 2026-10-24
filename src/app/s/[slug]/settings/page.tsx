@@ -15,7 +15,7 @@ export default async function Settings({ params }: { params: Promise<{ slug: str
   return (
     <>
       <PageHeader title="Settings" />
-      <Card className="max-w-xl">
+      <Card title="School" className="max-w-xl">
         <ActionForm action={updateSettingsAction} className="space-y-4">
           <input type="hidden" name="slug" value={slug} />
           <div><label className="label" htmlFor="name">School name</label><input id="name" name="name" defaultValue={ctx.school.name} required maxLength={120} className="input" /></div>

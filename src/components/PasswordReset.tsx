@@ -19,7 +19,7 @@ export function ForgotForm({ sinkHint }: { sinkHint: boolean }) {
   }
   return (
     <div className="card w-full max-w-sm p-6">
-      <h1 className="text-xl font-semibold">Reset your password</h1>
+      <h1 className="text-2xl font-bold">Reset your password</h1>
       {done ? (
         <p role="status" className="mt-3 text-sm text-muted">
           If an account exists for that email, a reset link is on its way.
@@ -51,7 +51,7 @@ export function ResetForm({ token }: { token: string | null }) {
   }
   return (
     <div className="card w-full max-w-sm p-6">
-      <h1 className="text-xl font-semibold">Choose a new password</h1>
+      <h1 className="text-2xl font-bold">Choose a new password</h1>
       {!token ? (
         <p role="alert" className="mt-3 text-sm text-danger">This reset link is invalid or has expired. <Link className="underline" href="/forgot-password">Request a new one</Link>.</p>
       ) : done ? (

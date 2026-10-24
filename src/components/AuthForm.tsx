@@ -51,7 +51,7 @@ export function AuthForm({ mode, next, google, sinkHint }: { mode: "sign-in" | "
   if (sentTo) {
     return (
       <div className="card w-full max-w-sm p-6" role="status">
-        <h1 className="text-xl font-semibold">Check your email</h1>
+        <h1 className="text-2xl font-bold">Check your email</h1>
         <p className="mt-2 text-sm text-muted">
           We sent a verification link to <strong className="text-text">{sentTo}</strong>. Open it to finish signing up.
         </p>
@@ -65,7 +65,7 @@ export function AuthForm({ mode, next, google, sinkHint }: { mode: "sign-in" | "
   }
   return (
     <div className="card w-full max-w-sm p-6">
-      <h1 className="text-xl font-semibold">{mode === "sign-in" ? "Sign in to Campusly" : "Create your account"}</h1>
+      <h1 className="text-2xl font-bold">{mode === "sign-in" ? "Sign in to Campusly" : "Create your account"}</h1>
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         {mode === "sign-up" && (
           <div>

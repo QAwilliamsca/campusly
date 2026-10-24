@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ActionForm, SubmitButton } from "@/components/ActionForm";
-import { Card, Empty, PageHeader, TableWrap } from "@/components/ui";
+import { Avatar, Card, Empty, PageHeader } from "@/components/ui";
 import { AppError } from "@/lib/errors";
 import { requireCtx } from "@/lib/session";
 import { getExam } from "@/lib/services/exams";
@@ -18,26 +18,23 @@ export default async function ExamMarks({ params }: { params: Promise<{ slug: st
   return (
     <>
       <PageHeader title={`${exam.name} · ${exam.subject}`} description={`${className} · ${exam.heldOn} · out of ${exam.maxMarks}. Leave a box empty for "not taken".`} />
-      <Card>
+      <Card title="Marks">
         {students.length === 0 ? (
           <Empty title="This class has no students" />
         ) : (
           <ActionForm action={enterMarksAction}>
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="examId" value={exam.id} />
-            <TableWrap>
-              <table className="data-table">
-                <thead><tr><th>Student</th><th>Score</th></tr></thead>
-                <tbody>
-                  {students.map((s) => (
-                    <tr key={s.id}>
-                      <td><label htmlFor={`score-${s.id}`} className="font-medium">{s.firstName} {s.lastName}</label> <span className="font-mono text-xs text-muted">{s.code}</span></td>
-                      <td><input id={`score-${s.id}`} name={`score:${s.id}`} type="number" min={0} max={exam.maxMarks} step={1} defaultValue={scores.get(s.id) ?? ""} className="input w-28" /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </TableWrap>
+            <ul className="grid gap-2 lg:grid-cols-2">
+              {students.map((s) => (
+                <li key={s.id} className="tile flex items-center gap-3 p-3">
+                  <Avatar name={`${s.firstName} ${s.lastName}`} size="h-9 w-9 text-xs" />
+                  <span className="min-w-0 flex-1"><label htmlFor={`score-${s.id}`} className="block truncate font-semibold">{s.firstName} {s.lastName}</label><span className="block font-mono text-xs text-muted">{s.code}</span></span>
+                  <input id={`score-${s.id}`} name={`score:${s.id}`} type="number" min={0} max={exam.maxMarks} step={1} defaultValue={scores.get(s.id) ?? ""} className="input w-24 text-right" />
+                  <span className="w-12 text-right text-xs text-muted">/ {exam.maxMarks}</span>
+                </li>
+              ))}
+            </ul>
             <div className="mt-4"><SubmitButton>Save marks</SubmitButton></div>
           </ActionForm>
         )}

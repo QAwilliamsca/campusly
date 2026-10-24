@@ -55,3 +55,25 @@ export function TableWrap({ children }: { children: React.ReactNode }) {
 }
 
 export const pct = (n: number | null) => (n === null ? "—" : `${n}%`);
+
+/** "Leo Santos" → "LS"; works for any script (Devanagari names get their first letters too). */
+export const initials = (name: string) => name.split(/\s+/).map((w) => [...w][0] ?? "").join("").slice(0, 2).toUpperCase();
+
+/** Avatar circle with initials. Decorative: the name is always written next to it. */
+export function Avatar({ name, size = "h-10 w-10 text-sm" }: { name: string; size?: string }) {
+  return <span aria-hidden="true" className={`avatar ${size}`}>{initials(name)}</span>;
+}
+
+/** Stat card: label, big number, optional note and icon (D-019 dashboards). */
+export function Kpi({ label, value, note, icon, strong }: { label: string; value: React.ReactNode; note?: React.ReactNode; icon?: React.ReactNode; strong?: boolean }) {
+  return (
+    <div className="card flex items-center justify-between gap-3 p-4 sm:p-5">
+      <div className="min-w-0">
+        <p className="text-sm text-muted">{label}</p>
+        <p className="mt-1 text-xl font-bold [overflow-wrap:anywhere] sm:text-3xl">{value}</p>
+        {note && <p className="mt-1 text-xs text-muted">{note}</p>}
+      </div>
+      {icon && <span className="hidden shrink-0 sm:block"><span className={strong ? "grid h-11 w-11 place-items-center rounded-full bg-panel text-panel-fg" : "icon-chip"}>{icon}</span></span>}
+    </div>
+  );
+}
