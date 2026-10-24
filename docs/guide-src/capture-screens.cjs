@@ -31,8 +31,13 @@ async function shot(page, path, name, { full = false, wait = 600 } = {}) {
   await shot(p, "/", "s01-landing");
   await shot(p, "/sign-in", "s02-sign-in");
   await shot(p, "/dev/brand", "s03-brand-kits", { wait: 1500 });
-  await p.setViewportSize({ width: 1280, height: 1500 });
-  await shot(p, "/dev/brand#evergreen", "s03b-brand-evergreen", { wait: 1500 });
+  // The chosen kit (D-019): light and dark side by side, cropped to the top of its section.
+  await p.goto(BASE + "/dev/brand", { waitUntil: "load" });
+  await p.waitForTimeout(1500);
+  await p.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+  const box = await p.locator("#ocean").boundingBox();
+  await p.screenshot({ path: OUT + "s03c-ocean-top.png", fullPage: true, clip: { x: box.x, y: box.y, width: box.width, height: Math.min(box.height, 720) } });
+  console.log("saved", "s03c-ocean-top");
   await c.close();
 
   // Principal
@@ -47,6 +52,13 @@ async function shot(page, path, name, { full = false, wait = 600 } = {}) {
   await shot(p, S + "/attendance", "s09-attendance", { full: true });
   await shot(p, S + "/exams", "s10-exams");
   await shot(p, S + "/fees", "s11-fees", { full: true });
+  await shot(p, S + "/fees", "s11a-fees-top");
+  { // The invoices card on its own, cut to the first rows (a full table is too tall for a page).
+    const card = p.locator("section", { has: p.getByRole("heading", { name: "Invoices", exact: true }) });
+    const b = await card.boundingBox();
+    await p.screenshot({ path: OUT + "s11b-fees-invoices.png", fullPage: true, clip: { x: b.x, y: b.y, width: b.width, height: Math.min(b.height, 760) } });
+    console.log("saved", "s11b-fees-invoices");
+  }
   await shot(p, S + "/members", "s12-members");
   await shot(p, S + "/audit", "s13-audit");
   await c.close();

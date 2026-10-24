@@ -24,7 +24,9 @@ export default async function SchoolLayout({ children, params }: { children: Rea
 
   return (
     <div className="flex min-h-dvh">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-surface p-5 lg:flex">
+      {/* Outer column paints the sidebar full height; the inner one stays put while the page scrolls. */}
+      <div className="hidden w-64 shrink-0 border-r border-border bg-surface lg:block">
+      <aside className="sticky top-0 flex h-dvh flex-col p-5">
         <Link href={base} className="flex items-center gap-2 px-2 text-xl font-bold"><Logo className="h-8 w-8" /> Campusly</Link>
         <div className="tile mt-6 p-3">
           <p className="text-xs text-muted">School</p>
@@ -40,6 +42,7 @@ export default async function SchoolLayout({ children, params }: { children: Rea
           </span>
         </div>
       </aside>
+      </div>
       <div className="min-w-0 flex-1">
         {/* pr-16 keeps clear of the fixed sun/moon toggle (D-014). */}
         <header className="flex items-center gap-3 border-b border-border bg-surface py-3 pl-4 pr-16 sm:pl-6">

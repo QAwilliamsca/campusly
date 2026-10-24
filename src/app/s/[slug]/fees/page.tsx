@@ -75,13 +75,13 @@ export default async function Fees({ params }: { params: Promise<{ slug: string 
                 {invoices.map((i) => (
                   <tr key={i.id}>
                     <td className="whitespace-nowrap font-mono text-xs font-semibold">{i.code}</td>
-                    <td><Link className="text-accent hover:underline" href={`/s/${slug}/students/${i.studentId}`}>{i.studentName}</Link></td>
+                    <td className="whitespace-nowrap"><Link className="font-medium text-accent hover:underline" href={`/s/${slug}/students/${i.studentId}`}>{i.studentName}</Link></td>
                     <td>{i.description}</td><td className="whitespace-nowrap">{i.dueOn}</td>
                     <td className="whitespace-nowrap">{formatMoney(i.amountMinor, cur)}</td><td className="whitespace-nowrap font-semibold">{formatMoney(i.paidMinor, cur)}</td>
                     <td><StatusBadge status={i.status} overdue={i.overdue} /></td>
                     <td>
                       {i.status !== "paid" && (
-                        <ActionForm action={recordPaymentAction} idempotent resetOnSuccess className="flex flex-wrap items-center gap-2">
+                        <ActionForm action={recordPaymentAction} idempotent resetOnSuccess className="flex min-w-72 items-center gap-2">
                           <input type="hidden" name="slug" value={slug} />
                           <input type="hidden" name="invoiceId" value={i.id} />
                           <label className="sr-only" htmlFor={`p-${i.id}`}>Amount paid for {i.code}</label>

@@ -67,13 +67,13 @@ export function Avatar({ name, size = "h-10 w-10 text-sm" }: { name: string; siz
 /** Stat card: label, big number, optional note and icon (D-019 dashboards). */
 export function Kpi({ label, value, note, icon, strong }: { label: string; value: React.ReactNode; note?: React.ReactNode; icon?: React.ReactNode; strong?: boolean }) {
   return (
-    <div className="card flex items-center justify-between gap-3 p-4 sm:p-5">
+    <div className="card flex min-w-0 items-center justify-between gap-3 overflow-hidden p-4 sm:p-5">
       <div className="min-w-0">
         <p className="text-sm text-muted">{label}</p>
-        <p className="mt-1 text-xl font-bold [overflow-wrap:anywhere] sm:text-3xl">{value}</p>
+        <p className="mt-1 whitespace-nowrap text-xl font-bold tabular-nums sm:text-2xl">{value}</p>
         {note && <p className="mt-1 text-xs text-muted">{note}</p>}
       </div>
-      {icon && <span className="hidden shrink-0 sm:block"><span className={strong ? "grid h-11 w-11 place-items-center rounded-full bg-panel text-panel-fg" : "icon-chip"}>{icon}</span></span>}
+      {icon && <span className="hidden shrink-0 xl:block"><span className={strong ? "grid h-11 w-11 place-items-center rounded-full bg-panel text-panel-fg" : "icon-chip"}>{icon}</span></span>}
     </div>
   );
 }

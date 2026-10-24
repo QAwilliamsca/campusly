@@ -13,8 +13,8 @@ const IMG = ROOT + "/docs/guide-img/";
 const DEP = ROOT + "/docs/deploy/img/";
 const OUT = ROOT + "/docs/Campusly-Live-Session-Idea-to-Live.docx";
 
-// Evergreen brand (D-013)
-const ACCENT = "0B6E5F", ACCENT_SOFT = "E3F3EF", INK = "16201C", MUTED = "55635C", GREY = "F1F3F0", WARN = "FCF0DC", WARN_INK = "8D4A06", BORDER = "DBE3DA", BUILD = "1F4E79", BUILD_SOFT = "E7EEF7";
+// Ocean & Amber brand (D-019)
+const ACCENT = "023047", ACCENT_SOFT = "E2F3FA", INK = "0B1D28", MUTED = "476272", GREY = "EEF5F9", WARN = "FFF1D6", WARN_INK = "8A4A00", BORDER = "D3E6F0", BUILD = "9A3C00", BUILD_SOFT = "FFF1E3";
 const W = 9026; // A4 content width (DXA) with 1" side margins
 const FONT = "Arial", MONO = "Courier New";
 const TR = (o) => new TextRun(typeof o === "string" ? { text: o, font: FONT } : { font: FONT, ...o });
@@ -67,7 +67,7 @@ function table(headers, rows, widths) {
   const body = rows.map((r, ri) => new TableRow({ cantSplit: true, children: r.map((c, i) => cell(c, widths[i], { fill: ri % 2 ? "FAFBF9" : undefined })) }));
   return [T(widths, [head, ...body]), p("", { after: 80 })];
 }
-// Prompt box. kind: "EXPLORE" (read-only, green) or "BUILD" (changes code, blue)
+// Prompt box. kind: "EXPLORE" (read-only, navy) or "BUILD" (changes code, orange)
 function promptBox(kind, id, title, five) {
   const dark = kind === "BUILD" ? BUILD : ACCENT, soft = kind === "BUILD" ? BUILD_SOFT : ACCENT_SOFT;
   const L = 1600, R = W - L;
@@ -322,7 +322,7 @@ add(
     ["The interview questions: customer, who logs in, top features, market", "docs/DECISION_JOURNAL.md, Entry 2"],
   ]),
   h2("2.4 See it in the app"),
-  ...fig(IMG + "s05-dashboard-principal.png", "Signed in as the principal: the four modules appear as tabs"),
+  ...fig(IMG + "s05-dashboard-principal.png", "Signed in as the principal: the four modules appear in the sidebar"),
   ...verify("Ask Claude: *Show me the must-never lines in docs/research/SPEC.md, numbered.* There should be **six**. Then ask: *Show me Entry 2 of docs/DECISION_JOURNAL.md.* You see the four questions that were asked."),
   ...decide("Who is the customer: one organisation, or many?", "If you will ever sell to a second organisation, every record needs to say which organisation owns it from day one (Campusly uses `school_id`).", "A tool for one organisation can skip this, but write that down as a decision so nobody adds a second customer by accident."),
 );
@@ -342,7 +342,7 @@ add(
   }),
   h2("3.3 What Claude should show you"),
   ...checklist([
-    ["**18** locked decisions, D-001 to D-018, each with a reason (D-016 is marked superseded by D-017)", "docs/DECISIONS.md"],
+    ["**19** locked decisions, D-001 to D-019, each with a reason (superseded ones are marked, e.g. D-013 by D-019)", "docs/DECISIONS.md"],
     ["The cut line: AI, real email, payment gateway, 2FA, admin console, marketing… each with \"what it would take\"", "docs/PLAN.md"],
     ["**8** user stories, S-01 to S-08, with Given / When / Then criteria", "docs/PLAN.md"],
     ["The roles × actions table (who may do what)", "docs/PLAN.md"],
@@ -360,25 +360,26 @@ add(
   h2("4.2 Explore prompt"),
   ...promptBox("EXPLORE", "4.2", "Show how the brand is built and switched", {
     Context: "Campusly repository; I am studying Stage 3 (Brand).",
-    Goal: "Show me where the colours, fonts and corner radius are defined, how dark mode works, how the theme toggle works, and how the four brand kits at /dev/brand were compared. Prove that screens use tokens instead of raw colours.",
+    Goal: "Show me where the colours, fonts and corner radius are defined, how dark mode works, how the theme toggle works, and how the brand kits at /dev/brand were compared. Prove that screens use tokens instead of raw colours.",
     Rules: "PLAYBOOK §8: components use tokens only.",
     Constraints: "Do not change any files.",
     Proof: "You search the screens for hex colour codes (like #0b6e5f) and report how many you find outside the tokens file.",
   }),
   h2("4.3 What Claude should show you"),
   ...checklist([
-    ["All brand tokens (Evergreen) in one place, light and dark", "src/app/globals.css"],
-    ["Fonts: Fraunces for headings, Nunito Sans for text", "src/app/layout.tsx"],
+    ["All brand tokens (Ocean & Amber) in one place, light and dark", "src/app/globals.css"],
+    ["One font, Plus Jakarta Sans, loaded once", "src/app/layout.tsx"],
     ["The sun/moon toggle and the script that sets the theme before the page appears", "src/components/ThemeToggle.tsx, src/app/layout.tsx"],
-    ["Four brand kits compared as real screens", "src/app/dev/brand/ (page.tsx, kits.css)"],
+    ["Six brand kits compared as real screens, including the founder's own palette", "src/app/dev/brand/ (page.tsx, kits.css)"],
     ["**Zero** hex colours in the screens", "src/app/s/, src/components/"],
-    ["The decisions: Evergreen chosen; toggle always top-right", "docs/DECISIONS.md D-013, D-014"],
+    ["The decisions: Evergreen first (D-013), then Ocean & Amber with a sidebar layout (D-019); toggle always top-right (D-014)", "docs/DECISIONS.md, docs/DECISION_JOURNAL.md Entry 11"],
   ]),
   h2("4.4 See it in the app"),
-  ...fig(IMG + "s03-brand-kits.png", "http://localhost:3000/dev/brand: four brand kits built from the real screens"),
-  ...fig(IMG + "s03c-evergreen-top.png", "Evergreen, the chosen kit: the same screen in light and dark"),
+  ...fig(IMG + "s03-brand-kits.png", "http://localhost:3000/dev/brand: brand kits built from the real screens"),
+  ...fig(IMG + "s03c-ocean-top.png", "Ocean & Amber, the chosen kit: the same screen in light and dark"),
   ...fig(IMG + "s14-dashboard-dark.png", "Click the moon (top-right) to switch to dark mode; the choice is remembered"),
   ...verify("Click the sun/moon button on any page and reload: your choice stays. Then ask Claude: *Run the browser tests for the theme toggle.* (The first time, Claude also installs the test browser.) Claude reports **2 passed**."),
+  ...box("A BRAND DECISION, REOPENED", "The first brand was Evergreen (D-013). Later the founder brought their own palette, a Dribbble design and a case-study dashboard. Claude added each as a kit at /dev/brand, rebuilt the case study with Campusly's real data, then every screen as samples. The founder picked **Ocean & Amber with a sidebar** (D-019), and the whole app changed in an afternoon, because colours live in one tokens file. Read Entry 11 of docs/DECISION_JOURNAL.md, then compare the screens in this guide with the commit history."),
   ...decide("What should a user feel in the first two seconds?", "Two adjectives you would defend to the buyer, such as \"friendly, trustworthy\". The colour and fonts follow from them.", "If you can't name two, put real screens side by side and let the buyer point."),
 );
 
@@ -450,14 +451,14 @@ add(
     Goal: "List every screen with its address and what it is for; which roles can see each one; and, using Fees as the example, walk me through the five layers of a feature from the database to the screen.",
     Rules: "The roles × actions table in docs/PLAN.md.",
     Constraints: "Do not change any files. One table for the screens.",
-    Proof: "You give me one demo account per role, and for each account the tabs it should see.",
+    Proof: "You give me one demo account per role, and for each account the menu items it should see.",
   }),
   h2("7.3 What Claude should show you"),
   ...checklist([
     ["11 school screens: dashboard, students, student detail, classes, attendance, exams, marks entry, fees, members, audit log, settings", "src/app/s/[slug]/"],
     ["One service file per module, holding all the rules", "src/lib/services/ (9 files)"],
     ["The five layers: database table → service → server action → screen → tests", "docs/ENGINEERING_GUIDE.md §3"],
-    ["Owner: 9 tabs · Teacher: 4 tabs · Parent and student: dashboard only", "src/app/s/[slug]/layout.tsx"],
+    ["Owner: 9 menu items · Teacher: 4 · Parent and student: dashboard only (sidebar on computers, tabs on phones)", "src/app/s/[slug]/layout.tsx"],
   ]),
   h2("7.4 See it in the app"),
   p("Signed in as **principal@example.com**:"),
@@ -465,7 +466,7 @@ add(
   ...fig(IMG + "s09-attendance.png", "Attendance: one click per student; saving again updates instead of duplicating"),
   ...fig(IMG + "s11b-fees-invoices.png", "Fees: paid, partly paid, unpaid and overdue invoices"),
   p("Now the same app as other people:"),
-  ...fig(IMG + "s16-dashboard-teacher.png", "teacher@example.com: only Grade 5-A, and only four tabs", 5.4),
+  ...fig(IMG + "s16-dashboard-teacher.png", "teacher@example.com: only Grade 5-A, and only four menu items", 5.4),
   ...fig(IMG + "s18-dashboard-parent.png", "parent@example.com: one card per child", 5.4),
   ...fig(IMG + "s19-parent-sibling-404.png", "The parent pastes another child's link: \"Not found\", with no hint the child exists", 5.4),
   ...fig(IMG + "s15-phone-fees.png", "On a phone: no sideways scrolling", 2.6, 5.4),
