@@ -29,6 +29,7 @@ apt-get update -y && apt-get install -y caddy
 id campusly >/dev/null 2>&1 || useradd --system --create-home --home-dir /home/campusly --shell /usr/sbin/nologin campusly
 mkdir -p /var/lib/campusly /etc/campusly
 chown -R campusly: /var/lib/campusly "$APP"
+chmod 600 "$APP/.git/config"
 [ -f /etc/campusly/secret ] || { openssl rand -hex 32 > /etc/campusly/secret; chmod 600 /etc/campusly/secret; }
 
 # Services: configure (works out the web address on every boot) → app → Caddy
