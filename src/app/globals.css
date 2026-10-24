@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/*
+ * Campusly brand tokens — "Calm & trustworthy" (D-007). PLAYBOOK §8.5: components use
+ * these tokens only; no raw colour values anywhere else in the codebase.
+ * Text tokens meet WCAG AA (≥ 4.5:1) on --bg and --surface in both themes.
+ */
+:root {
+  --accent: #1e4fd8;
+  --accent-hover: #1a43b8;
+  --accent-fg: #ffffff;
+  --accent-soft: #e9effd;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #dfe3e8;
+  --text: #111827;
+  --muted: #545e6c;
+  --success: #166534;
+  --success-soft: #e6f4ea;
+  --warn: #92400e;
+  --warn-soft: #fdf2e0;
+  --danger: #b91c1c;
+  --danger-soft: #fdeaea;
+  --focus: #2563eb;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #7aa2ff;
+    --accent-hover: #9bb9ff;
+    --accent-fg: #0a1020;
+    --accent-soft: #18233f;
+    --bg: #0c1016;
+    --surface: #141a22;
+    --surface-2: #1b222c;
+    --border: #2a323d;
+    --text: #e7eaf0;
+    --muted: #a0a9b6;
+    --success: #6ee7a0;
+    --success-soft: #12301f;
+    --warn: #fbbf6a;
+    --warn-soft: #33250f;
+    --danger: #ff8a8a;
+    --danger-soft: #3a1416;
+    --focus: #8fb2ff;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --radius-card: var(--radius);
+  --shadow-card: var(--shadow);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Component classes built only from tokens. */
+@utility card { @apply rounded-card border border-border bg-surface shadow-card; }
+@utility btn { @apply inline-flex min-h-11 whitespace-nowrap items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60; }
+@utility btn-primary { @apply btn bg-accent text-accent-fg hover:bg-accent-hover; }
+@utility btn-secondary { @apply btn border border-border bg-surface text-text hover:bg-surface-2; }
+@utility btn-danger { @apply btn border border-border bg-surface text-danger hover:bg-danger-soft; }
+@utility input { @apply min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text placeholder:text-muted; }
+@utility label { @apply mb-1 block text-sm font-medium text-text; }
+@utility data-table { @apply w-full text-left text-sm; }
+.data-table th { @apply border-b border-border px-3 py-2 font-medium text-muted; }
+.data-table td { @apply border-b border-border px-3 py-2 align-middle; }
+@utility badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
