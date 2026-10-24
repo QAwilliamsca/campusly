@@ -1,8 +1,11 @@
 // Builds docs/Campusly-Live-Session-Idea-to-Live.docx — the student guided document.
+// Structure: Part 0 setup → Part 1 method → Parts 2–10 reverse-engineer each built stage with read-only
+// EXPLORE prompts → Part 11 BUILD prompts for new features → Part 12 troubleshooting → Part 13 deploy → appendices.
+// Run: see docs/guide-src/README.md
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType, BorderStyle,
-  AlignmentType, HeadingLevel, ImageRun, PageBreak, Header, Footer, PageNumber, LevelFormat, TableLayoutType,
+  AlignmentType, HeadingLevel, ImageRun, Header, Footer, PageNumber, LevelFormat, TableLayoutType,
 } = require("docx");
 
 const ROOT = process.env.PROJECT;
@@ -11,12 +14,12 @@ const DEP = ROOT + "/docs/deploy/img/";
 const OUT = ROOT + "/docs/Campusly-Live-Session-Idea-to-Live.docx";
 
 // Evergreen brand (D-013)
-const ACCENT = "0B6E5F", ACCENT_SOFT = "E3F3EF", INK = "16201C", MUTED = "55635C", GREY = "F1F3F0", WARN = "FCF0DC", WARN_INK = "8D4A06", BORDER = "DBE3DA";
-const W = 9026; // A4 content width in DXA (1" margins)
+const ACCENT = "0B6E5F", ACCENT_SOFT = "E3F3EF", INK = "16201C", MUTED = "55635C", GREY = "F1F3F0", WARN = "FCF0DC", WARN_INK = "8D4A06", BORDER = "DBE3DA", BUILD = "1F4E79", BUILD_SOFT = "E7EEF7";
+const W = 9026; // A4 content width (DXA) with 1" side margins
 const FONT = "Arial", MONO = "Courier New";
 const TR = (o) => new TextRun(typeof o === "string" ? { text: o, font: FONT } : { font: FONT, ...o });
 
-// ── inline formatting: **bold**, `code` ───────────────────────────────────────
+// ── inline formatting: **bold**, *italic*, `code` ─────────────────────────────
 function runs(text, base = {}) {
   const out = [];
   for (const part of String(text).split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*|`[^`]+`)/g)) {
@@ -29,10 +32,9 @@ function runs(text, base = {}) {
   return out;
 }
 const p = (text, o = {}) => new Paragraph({ children: runs(text, o.run || {}), spacing: { after: o.after ?? 120, before: o.before ?? 0, line: 276 }, alignment: o.align, keepNext: o.keepNext });
-const h1 = (text, br = false) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [TR(text)], pageBreakBefore: br });
+const part = (text) => new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: true, children: [TR(text)] });
 const h2 = (text) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [TR(text)] });
-const label = (text, color = ACCENT) => new Paragraph({ children: [TR({ text, bold: true, color, size: 18, characterSpacing: 20 })], spacing: { before: 200, after: 60 }, keepNext: true });
-const pageBreak = () => new Paragraph({ children: [new PageBreak()] });
+const label = (text, color = ACCENT) => new Paragraph({ children: [TR({ text, bold: true, color, size: 18, characterSpacing: 20 })], spacing: { before: 160, after: 60 }, keepNext: true });
 
 let listCounter = 0;
 const bullets = (items) => items.map((t) => new Paragraph({ children: runs(t), numbering: { reference: "bullets", level: 0 }, spacing: { after: 60, line: 264 } }));
@@ -41,12 +43,14 @@ const steps = (items) => {
   return items.map((t) => new Paragraph({ children: runs(t), numbering: { reference: ref, level: 0 }, spacing: { after: 70, line: 264 } }));
 };
 
-// ── tables ────────────────────────────────────────────────────────────────────
-const cellBorders = { top: { style: BorderStyle.SINGLE, size: 4, color: BORDER }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER }, left: { style: BorderStyle.SINGLE, size: 4, color: BORDER }, right: { style: BorderStyle.SINGLE, size: 4, color: BORDER } };
-const noBorders = { top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } };
+// ── tables & boxes ────────────────────────────────────────────────────────────
+const line = (c = BORDER, s = 4) => ({ style: BorderStyle.SINGLE, size: s, color: c });
+const cellBorders = { top: line(), bottom: line(), left: line(), right: line() };
+const none = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+const noBorders = { top: none, bottom: none, left: none, right: none };
 function cell(content, width, o = {}) {
   const paras = (Array.isArray(content) ? content : [content]).map((c) =>
-    c instanceof Paragraph ? c : new Paragraph({ children: runs(c, { size: o.size || 19, bold: o.bold, color: o.color, italics: o.italics, font: o.font }), spacing: { after: 40, line: 252 } }),
+    c instanceof Paragraph ? c : new Paragraph({ children: runs(c, { size: o.size || 19, bold: o.bold, color: o.color, italics: o.italics }), spacing: { after: 40, line: 252 } }),
   );
   return new TableCell({
     children: paras,
@@ -57,52 +61,48 @@ function cell(content, width, o = {}) {
     columnSpan: o.span,
   });
 }
+const T = (widths, rows) => new Table({ width: { size: widths.reduce((a, b) => a + b, 0), type: WidthType.DXA }, columnWidths: widths, layout: TableLayoutType.FIXED, rows });
 function table(headers, rows, widths) {
-  const total = widths.reduce((a, b) => a + b, 0);
   const head = new TableRow({ tableHeader: true, children: headers.map((h, i) => cell(h, widths[i], { fill: ACCENT, color: "FFFFFF", bold: true, size: 18 })) });
   const body = rows.map((r, ri) => new TableRow({ cantSplit: true, children: r.map((c, i) => cell(c, widths[i], { fill: ri % 2 ? "FAFBF9" : undefined })) }));
-  return [new Table({ width: { size: total, type: WidthType.DXA }, columnWidths: widths, layout: TableLayoutType.FIXED, rows: [head, ...body] }), p("", { after: 80 })];
+  return [T(widths, [head, ...body]), p("", { after: 80 })];
 }
-
-// PROMPT box: five lines + what was actually typed
-function prompt(n, title, five, typed, typedNote) {
-  const L = 1500, R = W - L;
+// Prompt box. kind: "EXPLORE" (read-only, green) or "BUILD" (changes code, blue)
+function promptBox(kind, id, title, five) {
+  const dark = kind === "BUILD" ? BUILD : ACCENT, soft = kind === "BUILD" ? BUILD_SOFT : ACCENT_SOFT;
+  const L = 1600, R = W - L;
   const rows = [
-    new TableRow({ children: [cell(`PROMPT ${n}`, L, { fill: ACCENT, color: "FFFFFF", bold: true }), cell(title, R, { fill: ACCENT, color: "FFFFFF", bold: true })] }),
-    ...["Context", "Goal", "Rules", "Constraints", "Proof"].map((k) => new TableRow({ cantSplit: true, children: [cell(k, L, { fill: ACCENT_SOFT, bold: true }), cell(five[k], R)] })),
-    new TableRow({ children: [cell("", L, { fill: ACCENT_SOFT }), cell("**Plan first.**", R)] }),
+    new TableRow({ children: [cell(`${kind} PROMPT ${id}`, L, { fill: dark, color: "FFFFFF", bold: true, size: 18 }), cell(title, R, { fill: dark, color: "FFFFFF", bold: true })] }),
+    ...["Context", "Goal", "Rules", "Constraints", "Proof"].map((k) => new TableRow({ cantSplit: true, children: [cell(k, L, { fill: soft, bold: true }), cell(five[k], R)] })),
+    new TableRow({ children: [cell("", L, { fill: soft }), cell("**Plan first.**", R)] }),
   ];
-  const out = [new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [L, R], layout: TableLayoutType.FIXED, rows })];
-  if (typed) {
-    out.push(label(typedNote || "WHAT WAS ACTUALLY TYPED IN THIS BUILD", MUTED));
-    out.push(new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W], rows: [new TableRow({ children: [cell(typed, W, { fill: GREY, italics: true, size: 19 })] })] }));
-  }
-  out.push(p("", { after: 60 }));
-  return out;
+  return [T([L, R], rows), p(kind === "EXPLORE" ? "*Copy all five lines and \"Plan first.\" into Claude Code as one message.*" : "*Copy all five lines and \"Plan first.\" into Claude Code. Read the plan before you say \"go\".*", { run: { size: 17, color: MUTED }, after: 140 })];
 }
-// The three-row decision box from the reference style
+// Evidence checklist: [fact, where]
+function checklist(rows) {
+  const A = 500, B = 5300, C = W - A - B;
+  const head = new TableRow({ tableHeader: true, children: [cell("✓", A, { fill: ACCENT, color: "FFFFFF", bold: true }), cell("Claude should show you…", B, { fill: ACCENT, color: "FFFFFF", bold: true, size: 18 }), cell("Where it lives", C, { fill: ACCENT, color: "FFFFFF", bold: true, size: 18 })] });
+  return [T([A, B, C], [head, ...rows.map(([f, w]) => new TableRow({ cantSplit: true, children: [cell("☐", A), cell(f, B), cell(w, C, { size: 17 })] }))]), p("", { after: 80 })];
+}
 function decide(question, signal, different) {
   const L = 2100, R = W - L;
-  const rows = [
-    new TableRow({ children: [cell("HOW YOU DECIDE THIS YOURSELF", W, { fill: WARN, color: WARN_INK, bold: true, span: 2 })] }),
+  return [T([L, R], [
+    new TableRow({ children: [cell("HOW YOU DECIDE THIS ON YOUR OWN IDEA", W, { fill: WARN, color: WARN_INK, bold: true, span: 2 })] }),
     new TableRow({ children: [cell("The question", L, { bold: true }), cell(question, R)] }),
     new TableRow({ children: [cell("The signal", L, { bold: true }), cell(signal, R)] }),
     new TableRow({ children: [cell("If the answer is different", L, { bold: true }), cell(different, R)] }),
-  ];
-  return [new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [L, R], layout: TableLayoutType.FIXED, rows }), p("", { after: 120 })];
+  ]), p("", { after: 120 })];
 }
-function audit(text) {
-  const b = { ...noBorders, left: { style: BorderStyle.SINGLE, size: 24, color: ACCENT } };
-  return [new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W], rows: [new TableRow({ children: [cell([new Paragraph({ children: [TR({ text: "AUDIT CHECK  ", bold: true, color: ACCENT, size: 19 }), ...runs(text, { size: 19 })], spacing: { after: 20, line: 252 } })], W, { fill: "F6F8F5", borders: b })] })] }), p("", { after: 120 })];
+function box(title, text, fill = ACCENT_SOFT, color = ACCENT, leftRule = false) {
+  const b = leftRule ? { ...noBorders, left: line(color, 24) } : noBorders;
+  return [T([W], [new TableRow({ children: [cell([new Paragraph({ children: [TR({ text: title + "  ", bold: true, color, size: 19 }), ...runs(text, { size: 19 })], spacing: { after: 20, line: 252 } })], W, { fill, borders: b })] })]), p("", { after: 120 })];
 }
-function note(title, text, fill = WARN, color = WARN_INK) {
-  return [new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W], rows: [new TableRow({ children: [cell([new Paragraph({ children: [TR({ text: title + "  ", bold: true, color, size: 19 }), ...runs(text, { size: 19 })], spacing: { after: 20, line: 252 } })], W, { fill, borders: noBorders })] })] }), p("", { after: 120 })];
-}
+const verify = (text) => box("VERIFY", text, "F6F8F5", ACCENT, true);
 function code(lines) {
-  return [new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W], rows: [new TableRow({ children: [cell(lines.map((l) => new Paragraph({ children: [TR({ text: l || " ", font: MONO, size: 17 })], spacing: { after: 0, line: 240 } })), W, { fill: GREY, borders: noBorders })] })] }), p("", { after: 100 })];
+  return [T([W], [new TableRow({ children: [cell(lines.map((l) => new Paragraph({ children: [TR({ text: l || " ", font: MONO, size: 17 })], spacing: { after: 0, line: 240 } })), W, { fill: GREY, borders: noBorders })] })]), p("", { after: 100 })];
 }
 
-// ── images (reads PNG/JPEG size from the file header) ─────────────────────────
+// ── figures (numbered per part) ───────────────────────────────────────────────
 function imgSize(buf) {
   if (buf[0] === 0x89) return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
   let i = 2;
@@ -111,540 +111,534 @@ function imgSize(buf) {
     if (marker >= 0xc0 && marker <= 0xc3) return { w: buf.readUInt16BE(i + 7), h: buf.readUInt16BE(i + 5) };
     i += 2 + len;
   }
-  throw new Error("unknown image");
+  throw new Error("unknown image " + buf.length);
 }
-function img(file, caption, maxWIn = 6.27, maxHIn = 7.6) {
+let figPart = 0, figNo = 0;
+function fig(file, caption, maxWIn = 6.0, maxHIn = 7.4) {
   const data = fs.readFileSync(file);
   const { w, h } = imgSize(data);
   let width = maxWIn * 96, height = (width * h) / w;
   if (height > maxHIn * 96) { height = maxHIn * 96; width = (height * w) / h; }
+  const n = `Figure ${figPart}.${++figNo}`;
   return [
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 40 }, keepNext: true, children: [new ImageRun({ type: file.endsWith(".png") ? "png" : "jpg", data, transformation: { width: Math.round(width), height: Math.round(height) }, altText: { title: caption, description: caption, name: caption } })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [TR({ text: caption, italics: true, color: MUTED, size: 17 })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 40 }, keepNext: true, children: [new ImageRun({ type: file.endsWith(".png") ? "png" : "jpg", data, transformation: { width: Math.round(width), height: Math.round(height) }, altText: { title: n, description: caption, name: n } })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [TR({ text: n + "  ", bold: true, color: ACCENT, size: 17 }), TR({ text: caption, italics: true, color: MUTED, size: 17 })] }),
   ];
 }
-function stage(no, kicker, title, atEnd) {
-  return [
-    new Paragraph({ pageBreakBefore: true, children: [TR({ text: `STAGE ${no} · ${kicker}`, bold: true, color: ACCENT, size: 18, characterSpacing: 20 })], spacing: { after: 40 } }),
-    h1(title),
-    new Paragraph({ children: [TR({ text: "At the end: ", bold: true }), ...runs(atEnd)], spacing: { after: 160, line: 276 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: BORDER, space: 6 } } }),
-  ];
+function partHead(no, title, intro) {
+  figPart = no; figNo = 0;
+  return [part(`Part ${no} · ${title}`), ...(intro ? [p(intro, { after: 160 })] : [])];
 }
-const live = (text) => new Paragraph({ children: [TR({ text: "LIVE  ", bold: true, color: "FFFFFF", shading: { type: ShadingType.CLEAR, color: "auto", fill: ACCENT }, size: 17 }), TR({ text: " " }), ...runs(text)], spacing: { after: 100, line: 276 } });
-const see = (text) => new Paragraph({ children: [TR({ text: "What you should see  ", bold: true, color: ACCENT }), ...runs(text)], spacing: { before: 60, after: 120, line: 276 } });
 
 // ══════════════════════════════════════════════════════════════════════════════
 const C = [];
 const add = (...xs) => xs.flat().forEach((x) => C.push(x));
 
 // ── Cover ─────────────────────────────────────────────────────────────────────
+figPart = 0; figNo = 0;
 add(
   new Paragraph({ children: [TR({ text: "AI Operator · Live Session · [Hands On] · Work along with this", bold: true, color: ACCENT, size: 18, characterSpacing: 20 })], spacing: { after: 120 } }),
-  new Paragraph({ heading: HeadingLevel.TITLE, children: [TR("Idea to Live: Building Campusly, a School Management SaaS, with Claude Code and the Playbook")] }),
-  p("From one vague sentence to a tested multi-school app, a student-ready GitHub repository and a server on AWS, with every decision explained so you can make it yourself next time.", { run: { size: 24, color: MUTED }, after: 240 }),
+  new Paragraph({ heading: HeadingLevel.TITLE, children: [TR("Idea to Live: Campusly, a School Management SaaS built with Claude Code and the Playbook")] }),
+  p("You receive a finished, tested application. First you take it apart with Claude, stage by stage, and check every claim against the code. Then you extend it with new features, using the same method that built it.", { run: { size: 24, color: MUTED }, after: 240 }),
   label("THE PROBLEM"),
-  p("Everyone can get Claude Code to produce a screen. Almost nobody can take a vague idea through requirements, decisions, design, build, testing, a security review and deployment without the result falling apart at the first real user, or without the AI quietly guessing the things the buyer cares about most."),
-  label("HOW WE SOLVE IT"),
-  p("We start from one sentence, *build a school management system*, and run it through **PLAYBOOK.md**, an operating manual for an AI agent. The playbook makes Claude ask before it guesses, write tests before code, keep the founder in charge of every customer-visible decision, and prove every claim with a number. Every stage below shows the prompt, what Claude asked, what was built, how it was checked, and how you make the same decision on your own idea."),
+  p("Anyone can get an AI to produce a screen. Very few people can take an idea all the way to a product that stays correct, safe and deployable. The difference is not the AI: it is the method around it, and the questions asked before any code is written."),
+  label("HOW THIS SESSION WORKS"),
+  p("Campusly was built with **PLAYBOOK.md**, an operating manual for an AI agent. You get the repository. For every stage that is already built, you run a **read-only Explore prompt**: Claude finds that stage in the code and shows you the evidence, and you verify it yourself. Then you run **Build prompts** to add new features. Both kinds of prompt use the same five-line formula."),
   label("WHAT YOU WILL HAVE AT THE END"),
-  p("**Campusly**, a multi-school web app (students and classes, attendance, exams and report cards, fees) where five roles each see only their own data, guarded by **155 automated tests**. You also get a **decision journal** of every question the founder answered, a **GitHub repository** you can clone and extend, an **AWS server** ready to go live, and a method you can run on any idea."),
-  ...img(IMG + "s01-landing.png", "Campusly: the public home page in the Evergreen brand (Stage 3)", 6.0),
+  p("A working copy of Campusly on your machine; a clear picture of how each playbook stage shows up in real code; at least one new feature you added yourself, with tests; and a prompt method you can reuse on any idea."),
+  ...fig(IMG + "s01-landing.png", "Campusly, the application you receive"),
+  h2("How this guide is organised"),
+  ...table(
+    ["Part", "What you do", "Prompt type"],
+    [
+      ["0", "Get the repository running on your machine", "Orient"],
+      ["1", "Learn the method: the playbook, the prompt formula, Explore vs Build", "None"],
+      ["2–10", "Reverse-engineer each stage that is already built, and verify it", "Explore (read-only)"],
+      ["11", "Add new features to Campusly", "Build"],
+      ["12", "Fix common problems", "None"],
+      ["13", "See how the app is deployed to AWS", "None (instructor demonstration)"],
+      ["A–D", "Appendices: rules, templates, demo accounts, decision checklist", "None"],
+    ],
+    [1100, 5626, 2300],
+  ),
 );
 
-// ── 0. How this session runs ──────────────────────────────────────────────────
+// ── Part 0 · Get set up ───────────────────────────────────────────────────────
 add(
-  h1("0. How this session runs", true),
-  p("Campusly was built **before** the session, stage by stage. In the session we walk through it in order: the instructor shows each stage on screen (**LIVE**), and you repeat the same prompts on your own idea afterwards (**PRACTICE**). The second half of the session builds new features together; that part is added to this guide afterwards."),
+  partHead(0, "Get set up", "Do this before the session. It takes about ten minutes, and you need no coding knowledge."),
+  h2("0.1 What you need"),
   ...table(
-    ["#", "Stage", "What happens", "Time", "Playbook"],
+    ["Item", "Where to get it"],
     [
-      ["1", "Research", "One vague sentence becomes a one-page spec after a short interview", "0:00–0:10", "§6 (Stage 1)"],
-      ["2", "Decide & lock", "Decision table, a hard cut line, user stories that become tests", "0:10–0:20", "§7 (Stage 2)"],
-      ["3", "Brand", "Name and design tokens; four kits shown as real screens; a theme toggle", "0:20–0:30", "§8 (Stage 3)"],
-      ["4", "Architecture", "A boring stack that runs with zero installs; lint and CI from commit 1", "0:30–0:35", "§9 (Stage 4)"],
-      ["5", "Foundations", "Tenancy wall, one permission check, codes, audit, mail, files: tests first", "0:35–0:50", "§10 (Stage 5)"],
-      ["6", "Feature slices", "Students, attendance, exams, fees: every screen, every role", "0:50–1:05", "§11 (Stage 6)"],
-      ["7", "Quality", "155 tests, the sabotage demo, a red-team review by a second agent", "1:05–1:20", "§15 (Stage 10)"],
-      ["8", "Demo data", "An account for every role and every empty state", "1:20–1:25", "§11 Demo data"],
-      ["9", "Student-ready repo", "PLAYBOOK.md, CLAUDE.md, GitHub, one-command setup", "1:25–1:35", "§4, §9"],
-      ["10", "Deploy (in progress)", "AWS account, budget alarm, read-only token, Lightsail server", "1:35–1:55", "§16 (Stage 11)"],
+      ["Access to the Campusly repository on GitHub", "Your instructor adds you; accept the email invitation"],
+      ["GitHub Desktop (recommended)", "desktop.github.com"],
+      ["Node.js 22 or newer (choose the LTS version)", "nodejs.org"],
+      ["Claude Code", "As set up in earlier sessions"],
     ],
-    [500, 1700, 4026, 1300, 1500],
+    [4500, 4526],
   ),
-  h2("Before the session (instructor, once)"),
-  ...table(
-    ["You need", "Detail"],
-    [
-      ["The repository", "github.com/shivavashishtha/campusly (private). Add students as collaborators, or have them fork it."],
-      ["On each student's machine", "Node.js 22+ (from nodejs.org) and Claude Code. Nothing else: the database is embedded, so no Docker."],
-      ["The app running locally", "`pnpm install`, then `pnpm dev`. It seeds the demo schools and opens http://localhost:3000."],
-      ["Demo sign-ins", "principal@ / teacher@ / parent@ / student@example.com: password `campusly-demo-1` (fictional people)."],
-      ["Accounts (instructor only)", "AWS (with the $25 budget alarm) and GitHub. Students do not need AWS accounts."],
-      ["A rehearsal", "Run the sabotage demo in Stage 7 once beforehand; it is the moment students remember."],
-    ],
-    [2600, 6426],
-  ),
-  h2("The prompt formula (every prompt in this guide, and every prompt you write after it)"),
-  p("A prompt is a brief, not a wish. Every prompt below is built from the same five lines, in this order, and ends with **Plan first**:"),
-  ...table(
-    ["Line", "What it says", "Example"],
-    [
-      ["Context", "What this is and where we are", "Campusly; Stage 6, the fees module"],
-      ["Goal", "The one result, stated as something you can see", "Bill a whole class; record payments; show paid / partly paid / overdue"],
-      ["Rules", "The must-never-happen rules that apply", "No double payment; money never stored as a float"],
-      ["Constraints", "What not to do", "No payment gateway; brand tokens only"],
-      ["Proof", "How we will know it worked", "A double-clicked payment is recorded once, shown by a test"],
-    ],
-    [1500, 3300, 4226],
-  ),
-  ...note("THE TWIST IN THIS BUILD", "The founder typed short, natural sentences on purpose, the way most people talk to an AI. Under each PROMPT you will see **what was actually typed** next to **the five-line version**. Compare them: every question Claude asked during the build was one of the missing lines. That is the skill this session teaches."),
-);
-
-// ── 1. Concept ────────────────────────────────────────────────────────────────
-add(
-  h1("1. The concept: one playbook, run once, on one product", true),
-  p("**PLAYBOOK.md** (in the repository) organises a whole product build into 14 stages in five tracks. In this build we ran Stages 1–6 and 10 fully and started Stage 11. The rest are written down as a **cut line**, so nothing is forgotten."),
-  ...table(
-    ["Track", "Stages", "In this build"],
-    [
-      ["Discover", "1 Research · 2 Decide & lock", "Done"],
-      ["Design the base", "3 Brand · 4 Architecture · 5 Foundations", "Done"],
-      ["Build", "6 Vertical slices · 7 AI layer · 8 Integrations", "6 done; 7–8 below the cut line"],
-      ["Harden", "9 Admin · 10 Quality · 11 Deploy & operate", "10 done; 11 in progress; 9 below the cut line"],
-      ["Sell & scale", "12 Marketing · 13 First customers · 14 Scale & cost", "Below the cut line"],
-    ],
-    [2000, 4226, 2800],
-  ),
-  p("Three ideas carry the whole session:"),
-  ...bullets([
-    "**The founder decides; the agent proposes.** Anything a school, parent or student could notice belongs to the human (§1.1). Claude asks one question at a time, always with options and one recommendation. Purely technical choices are Claude's, and it writes them down.",
-    "**Tests before code, rules before features.** We first wrote down what must never happen (a parent seeing someone else's child, a payment recorded twice), then wrote a test that fails if it happens, and only then built the feature.",
-    "**Done means verified, with a number.** No step is announced as working until there is evidence: a test count, a screenshot, a figure that reconciles. When something is cut, it is named, never silently dropped (§2.5, §2.7).",
-  ]),
-);
-
-// ── 2. Product ────────────────────────────────────────────────────────────────
-add(
-  h1("2. The product we build: Campusly"),
-  p("**Who pays:** schools that run admissions, attendance, marks and fees on paper, spreadsheets and chat groups. Campusly is sold to **many schools**; each school is an isolated workspace."),
-  p("**What they lose today:** records disagree, parents find out late, report cards need spreadsheet work, fee follow-up is manual. **What success looks like:** a teacher marks a class in under a minute; a parent sees today's attendance the same day; a report card needs zero spreadsheet work."),
-  p("**The job, in one sentence:** give every school one place where admins, teachers, parents and students see the same, correct record of each student's attendance, marks and fees."),
-  h2("The six things that must never happen"),
+  h2("0.2 Get the code"),
   ...steps([
-    "A user from School A sees any record of School B.",
-    "A parent sees a child who isn't theirs; a student sees another student's marks.",
-    "A teacher edits attendance or marks for a class they don't teach.",
-    "An email reaches a real person from a test environment.",
-    "A payment is recorded twice from a double click.",
-    "Money is stored or added up as a decimal (floating-point) number.",
+    "Open the repository page on GitHub and click **Code → Open with GitHub Desktop**.",
+    "Choose a folder on your computer and click **Clone**.",
+    "Do **not** use \"Download ZIP\": it drops the history of commits, and Part 10 uses that history.",
   ]),
-  h2("Who logs in, and what they see"),
+  h2("0.3 Open it in Claude Code and run the Orient prompt"),
+  p("Open the cloned folder in Claude Code. Claude automatically reads **CLAUDE.md**, the project's briefing file. Then send this prompt:"),
+  ...promptBox("EXPLORE", "0.3", "Orient: set up and run Campusly", {
+    Context: "I have just cloned the Campusly repository. I am new to coding.",
+    Goal: "Install what is needed, start the app, and explain in five short bullet points what Campusly is.",
+    Rules: "Follow CLAUDE.md and the README.",
+    Constraints: "Do not change any code. If Node.js is missing, tell me how to install it instead of trying workarounds. Never ask me to paste passwords or keys into the chat.",
+    Proof: "The app runs at http://localhost:3000, and you tell me which demo account to sign in with.",
+  }),
+  h2("0.4 Sign in"),
+  ...steps([
+    "Open **http://localhost:3000** and click **Sign in**.",
+    "Use **principal@example.com** with password **campusly-demo-1** (every demo account uses this password; all people are fictional).",
+    "Choose **Maple Grove School**.",
+  ]),
+  ...fig(IMG + "s04-school-picker.png", "After signing in as the principal: two schools to choose from"),
+  ...verify("You see the Maple Grove dashboard with **12 students**, **1 / 3** classes marked today and **$3,455.00** fees outstanding. If not, see Part 12."),
+);
+
+// ── Part 1 · The method ───────────────────────────────────────────────────────
+add(
+  partHead(1, "The method"),
+  h2("1.1 The playbook"),
+  p("**PLAYBOOK.md** (in the repository) is an operating manual for an AI agent. It splits building a product into 14 stages in five tracks, and it sets rules for how the agent works with the person who owns the product (the *founder*)."),
+  ...table(
+    ["Track", "Stages", "In Campusly"],
+    [
+      ["Discover", "1 Research · 2 Decide & lock", "Built: Parts 2–3"],
+      ["Design the base", "3 Brand · 4 Architecture · 5 Foundations", "Built: Parts 4–6"],
+      ["Build", "6 Feature slices · 7 AI layer · 8 Integrations", "6 built: Part 7 · AI comes in Part 11"],
+      ["Harden", "9 Admin · 10 Quality · 11 Deploy", "10 built: Part 8 · Deploy: Part 13"],
+      ["Sell & scale", "12 Marketing · 13 Customers · 14 Scale", "Not in this course"],
+    ],
+    [1900, 4126, 3000],
+  ),
+  h2("1.2 Three ideas that run through everything"),
+  ...steps([
+    "**The founder decides; the agent proposes.** Anything a user could notice is the founder's call. Claude asks one question at a time, always with options and a recommendation. Technical choices are Claude's, and it writes them down.",
+    "**Rules before features, tests before code.** First list what must never happen. Then write a test that fails if it happens. Only then build.",
+    "**Done means verified, with a number.** A claim is not finished until there is evidence: a test count, a screenshot, a figure that adds up.",
+  ]),
+  h2("1.3 The five-line prompt formula"),
+  p("Every prompt in this guide, and every prompt you write after it, has the same five lines in this order, and ends with **Plan first.**"),
+  ...table(
+    ["Line", "What it says"],
+    [
+      ["Context", "What this is and where we are"],
+      ["Goal", "The one result, stated as something you can see"],
+      ["Rules", "Which rules apply (the must-never rules, the playbook section)"],
+      ["Constraints", "What not to do"],
+      ["Proof", "How you will know it worked"],
+    ],
+    [1800, 7226],
+  ),
+  p("If you can't write the Proof line, you are not ready to send the prompt."),
+  h2("1.4 Two kinds of prompt"),
+  ...table(
+    ["", "Explore prompt (Parts 0, 2–10)", "Build prompt (Part 11)"],
+    [
+      ["Purpose", "Understand what is already built", "Add something new"],
+      ["Changes files?", "**Never.** Always says \"Do not change any files\"", "Yes, on a separate branch"],
+      ["What Claude returns", "Evidence: file names, the relevant lines, a command you can run", "A plan, then code, tests and a summary"],
+      ["You finish by", "Ticking the checklist and doing the VERIFY step", "Checking the Proof line yourself"],
+    ],
+    [1900, 3563, 3563],
+  ),
+  h2("1.5 Campusly in one page"),
+  p("**Who it's for:** schools that keep attendance, marks and fees on paper or spreadsheets. It is sold to **many schools**; each school's data is fully separate."),
+  p("**The job, in one sentence:** give every school one place where admins, teachers, parents and students see the same, correct record of each student's attendance, marks and fees."),
   ...table(
     ["Role", "Sees", "Can change"],
     [
-      ["Owner (principal)", "Everything in their school", "Everything; only the owner can invite admins"],
-      ["Admin", "Everything in their school", "Everything except inviting admins or removing the owner/admins"],
+      ["Owner (principal)", "Everything in their school", "Everything; only the owner invites admins"],
+      ["Admin", "Everything in their school", "Everything except inviting or removing admins"],
       ["Teacher", "Only the classes they teach", "Attendance and marks for those classes"],
-      ["Parent", "Only their own children", "Nothing: read-only"],
-      ["Student", "Only themself", "Nothing: read-only"],
+      ["Parent", "Only their own children", "Nothing (read-only)"],
+      ["Student", "Only themself", "Nothing (read-only)"],
     ],
     [1900, 3300, 3826],
   ),
-  ...img(IMG + "s04-school-picker.png", "After sign-in: the school picker. Priya owns Maple Grove and is an admin at Riverside.", 6.0),
 );
 
-// ── STAGE 1 ───────────────────────────────────────────────────────────────────
+// ── Part 2 · Research ─────────────────────────────────────────────────────────
 add(
-  stage(1, "PLAYBOOK §6 · 0:00–0:10", "Research: the vague idea becomes one page", "`docs/research/SPEC.md` with the customer and the job in one sentence each, the top must-haves, the six must-never-happen lines and the non-functional requirements; plus `docs/DECISION_JOURNAL.md`, which logs every question asked."),
-  live("Open Claude Code in an empty folder, put PLAYBOOK.md in it, and type the first prompt."),
-  prompt(1, "Turn the idea into a spec", {
-    Context: "A new product; nothing exists. PLAYBOOK.md in this folder is the operating manual.",
-    Goal: "`docs/research/SPEC.md`: who the customer is and the job they hire us for (one sentence each), the top 3–4 must-haves, what must never happen, and the basic non-functional requirements.",
-    Rules: "Playbook §6: interview the founder one question at a time; scope, segment and locale are the founder's decisions (§1.1).",
-    Constraints: "No code yet. Check the machine yourself before asking (installed tools are facts, not questions). The must-never list has at most six lines.",
-    Proof: "I can read the customer and job sentences aloud and agree; the must-never list has six or fewer lines.",
-  }, "So I am an AI trainer… I'm sharing a playbook… I want you to utilize that playbook and help me in building a school management system. I want you to build the whole application, and on the basis of that we will be creating a guided document."),
-  p("**What Claude did before asking anything:** read the whole playbook and checked the machine (Node 22 and pnpm installed; **no Docker, no Postgres**). Then it interviewed the founder:"),
-  ...table(
-    ["Question Claude asked", "Options", "Recommended", "Founder chose"],
-    [
-      ["Who is the customer?", "Many schools (SaaS) · one school · a school chain", "SaaS for many schools", "SaaS for many schools"],
-      ["Who logs in during Phase 1?", "Admin · Teachers · Parents · Students", "Admin + Teachers", "All four"],
-      ["Top features the first 10 schools demand?", "Students & classes · Attendance · Exams · Fees", "First three", "All four"],
-      ["Which market / locale?", "India · USA · Generic", "India", "Generic / international"],
-    ],
-    [2500, 2700, 1800, 2026],
-  ),
-  ...note("A MISTAKE, OWNED", "Claude first jumped straight to the Stage 2 decision table. The founder ignored it and asked for a journal instead; Claude noticed it had skipped Stage 1 and restarted with the interview. Journal Entry 1 records this, because students make the same mistake."),
-  prompt(2, "Keep a decision journal for the students", {
-    Context: "Campusly; the interview has started. The founder will teach from this build.",
-    Goal: "`docs/DECISION_JOURNAL.md`: every question asked, the options, Claude's recommendation and reason, the founder's answer, and the playbook rule that forced the question.",
-    Rules: "§3.3: write down every founder answer the moment it is given.",
-    Constraints: "Plain language for non-technical readers; one entry per round of questions; include mistakes.",
-    Proof: "A student can read an entry and say why the question had to be asked.",
-  }, "I want you to keep all these logs in a file that I will communicate to the students, that what kind of decision were made from my side… what kind of questions it will be asking in order to make the idea more relevant to the core requirements."),
-  see("`SPEC.md` opens with *Customer: schools that today run admissions, attendance, marks and fees on paper or spreadsheets*. The journal has a table per round, and the competitor check is marked **cut**, not silently skipped."),
-  audit("`docs/research/SPEC.md` exists; customer and job are one sentence each; six must-never lines; the journal records every question with options, recommendation and answer."),
-  decide("Who is the customer: one organisation, or many?", "If you will ever sell it to a second organisation, every table needs an owner ID (here `school_id`) from day one. Adding it later means touching every query.", "A single-organisation internal tool can skip tenancy, but write that down as a decision so nobody adds a second customer without noticing."),
-);
-
-// ── STAGE 2 ───────────────────────────────────────────────────────────────────
-add(
-  stage(2, "PLAYBOOK §7 · 0:10–0:20", "Decide and lock: one table, one cut line", "`docs/DECISIONS.md` (the decision table and D-001 onward, \"do not reopen without the owner\") and `docs/PLAN.md` (scope, cut line, data model, roles × actions table, user stories with acceptance criteria)."),
-  live("Show the two question rounds; this is the only stage where the playbook allows batching questions."),
-  prompt(3, "The decision table", {
-    Context: "Campusly; SPEC.md is approved.",
-    Goal: "The 14-row decision table with Claude's recommendation and one reason per row; the cut line; user stories with Given/When/Then acceptance criteria; the build plan in slices.",
-    Rules: "§7: every row is filled before feature code; anything that would double the build goes below the cut line, named.",
-    Constraints: "Batch questions allowed here only. Flag anything 'thin' rather than dropping it.",
-    Proof: "A stranger can read PLAN.md and say what ships on the last day and what does not.",
-  }, "(Answered through Claude's question cards: \"Everything you picked\" · \"Stages 1–6 + 10\" · \"Next.js + embedded Postgres\" · \"Markdown in the repo\" · then \"Campusly\" · \"Calm & trustworthy\" · \"Email + password + Google\" · \"Per student, prices later\".)", "WHAT THE FOUNDER ANSWERED"),
-  ...table(
-    ["Decision", "Claude recommended (+ reason)", "Founder chose"],
-    [
-      ["Cut line", "All 4 modules and 4 roles; portals are read-only and cheap", "Everything"],
-      ["How much of the playbook", "Stages 1–6 + 10: teachable, includes testing", "Stages 1–6 + 10"],
-      ["Stack (no Docker on the machine)", "Next.js + embedded Postgres (PGlite): zero installs", "Accepted"],
-      ["Product name", "Schoolbase", "**Campusly**"],
-      ["Sign-in", "Email + password; 2FA later", "**+ Google** (button hidden until keys exist)"],
-      ["Pricing unit (the flip test)", "Per student, stored as data", "Accepted"],
-    ],
-    [2700, 4100, 2226],
-  ),
-  p("Notice two overrides: name and sign-in. The playbook says to state the risk once, then build what the founder chose (§3.5). Claude did not re-argue."),
-  see("PLAN.md's cut-line table lists every excluded stage **with what it would take**: AI layer, live email, payment gateway, 2FA, admin console, deploy and backups, marketing site. It also has a roles × actions table and eight user stories, S-01 to S-08."),
-  ...code([
-    "S-06 Fees — AC2: Given a double-click on \"Record payment\",",
-    "                 then exactly one payment is stored (idempotency key).",
-    "  → became tests/integration/exams-fees.test.ts AND tests/e2e/journey.spec.ts",
+  partHead(2, "Research: what are we building, and for whom?"),
+  h2("2.1 What this stage is for"),
+  p("Before any code, the playbook turns a vague idea into one page: who the customer is, the one job they need done, the few features they need first, and the short list of things that must never happen. It does this by asking the founder questions, one at a time."),
+  h2("2.2 Explore prompt"),
+  ...promptBox("EXPLORE", "2.2", "Explain the product and how the idea was clarified", {
+    Context: "This is the Campusly repository, built with PLAYBOOK.md. I am studying it, not changing it.",
+    Goal: "Explain the product: who it is for, the job in one sentence, the main features, the five roles and what each can see, the main screens, and the things that must never happen. Then list the questions that were asked to turn the original idea into this.",
+    Rules: "Only report what is in the repository, and name the file for every fact.",
+    Constraints: "Do not change any files. Plain language. One page.",
+    Proof: "Every point names a file, such as docs/research/SPEC.md, docs/PLAN.md or docs/DECISION_JOURNAL.md.",
+  }),
+  h2("2.3 What Claude should show you"),
+  ...checklist([
+    ["The customer: schools running attendance, marks and fees on paper or spreadsheets, sold to many schools", "docs/research/SPEC.md"],
+    ["The job in one sentence (one shared, correct record per student)", "docs/research/SPEC.md"],
+    ["Four modules: Students & classes, Attendance, Exams & report cards, Fees", "docs/research/SPEC.md, docs/PLAN.md"],
+    ["Five roles and what each can see", "docs/PLAN.md (roles × actions table)"],
+    ["**Six** must-never-happen lines (e.g. a parent never sees another family's child)", "docs/research/SPEC.md"],
+    ["The interview questions: customer, who logs in, top features, market", "docs/DECISION_JOURNAL.md, Entry 2"],
   ]),
-  audit("Every row of the decision table has an answer; the cut line names each excluded item and what it would take; every story has acceptance criteria."),
-  decide("What goes below the cut line?", "Anything that needs an account you don't have yet, or that would double the build: payments, AI, a second module, a native app.", "If a buyer refuses to sign without it, move it above the line and move something else down. Write that down too."),
+  h2("2.4 See it in the app"),
+  ...fig(IMG + "s05-dashboard-principal.png", "Signed in as the principal: the four modules appear as tabs"),
+  ...verify("Open `docs/research/SPEC.md` and count the must-never lines. There should be **six**. Then read Entry 2 of `docs/DECISION_JOURNAL.md` to see the four questions that were asked."),
+  ...decide("Who is the customer: one organisation, or many?", "If you will ever sell to a second organisation, every record needs to say which organisation owns it from day one (Campusly uses `school_id`).", "A tool for one organisation can skip this, but write that down as a decision so nobody adds a second customer by accident."),
 );
 
-// ── STAGE 3 ───────────────────────────────────────────────────────────────────
+// ── Part 3 · Decide & lock ────────────────────────────────────────────────────
 add(
-  stage(3, "PLAYBOOK §8 · 0:20–0:30", "Brand: the product has a face before it has features", "Colours, fonts and corner radius defined once in `src/app/globals.css` as tokens (light and dark), four brand kits shown as real screens at `/dev/brand`, the founder's pick applied, and a sun/moon toggle on every page."),
-  live("Open http://localhost:3000/dev/brand and scroll through the four kits, each in light and dark."),
-  prompt(4, "Show me brand kits and let me pick", {
-    Context: "Campusly; every screen exists and uses tokens only; D-007 picked 'Calm & trustworthy'.",
-    Goal: "Four distinct brand kits rendered with the real components (a marketing hero and a dashboard each, light and dark) so the founder can choose one.",
-    Rules: "§8.4: real screens, not mood boards; pick one, never blend. §21.14: reopening a locked decision means restating it, estimating impact and recording the new one.",
-    Constraints: "Each kit changes tokens only; every text pair meets WCAG AA contrast (4.5:1); no component edits.",
-    Proof: "The contrast check passes for all kits, and switching kits changes zero component files.",
-  }, "improve the brand kit, suggest me some brand kits and I will select"),
-  ...img(IMG + "s03-brand-kits.png", "/dev/brand: the four candidate kits, each built from the real product components", 6.0),
-  ...img(IMG + "s03c-evergreen-top.png", "Evergreen, the founder's choice: the same dashboard in light and dark", 6.0),
-  ...table(
-    ["Kit", "Feel", "Lowest contrast"],
-    [
-      ["1 · Ink & Paper (Claude's recommendation)", "Academic, trustworthy; serif headings", "5.57 : 1"],
-      ["2 · Evergreen (**founder's choice, D-013**)", "Friendly, natural; teal-green, rounded", "5.38 : 1"],
-      ["3 · Sunrise", "Warm, energetic; coral, pill buttons", "4.57 : 1"],
-      ["4 · Slate & Violet", "Bold, modern; tight corners", "5.75 : 1"],
-    ],
-    [3800, 3426, 1800],
-  ),
-  prompt(5, "A theme switch, always in the same place", {
-    Context: "Campusly; Evergreen applied; dark mode followed the operating system only.",
-    Goal: "A sun/moon button fixed top-right on every page that switches light/dark and remembers the choice.",
-    Rules: "Brand tokens only; nothing may cover header buttons.",
-    Constraints: "No flash of the wrong theme on load; first visit follows the OS setting.",
-    Proof: "A browser test checks the button's position on every kind of page at desktop and phone width.",
-  }, "always keep a sun/moon icon toggle on top right corner to switch between the themes"),
-  ...img(IMG + "s14-dashboard-dark.png", "The principal's dashboard in dark mode; the moon/sun toggle sits top-right on every page", 6.0),
-  see("The rebrand changed **one CSS file, the font import and the favicon**, and no screen code. That is the payoff of tokens. This instruction needed no questions because it was already precise; it was recorded as D-014 so a future session can't drop it."),
-  audit("`grep` finds no hex colours in components; all eight light/dark palettes pass AA; `tests/e2e/theme.spec.ts` passes."),
-  decide("What should a user feel in the first two seconds?", "Two adjectives you would defend to the buyer (\"friendly, trustworthy\"). The accent colour and fonts follow from them.", "If you can't name two, put real screens side by side and let the buyer point. Never decide brand from a mood board."),
-);
-
-// ── STAGE 4 ───────────────────────────────────────────────────────────────────
-add(
-  stage(4, "PLAYBOOK §9 · 0:30–0:35", "Architecture: few parts, each one boring", "A repo with TypeScript strict, a linter, `.env.example`, a CI workflow, and a stack that runs on any student's laptop with **zero installs beyond Node**."),
-  prompt(6, "Pick a stack that runs everywhere", {
-    Context: "Campusly; decisions locked; the machine has Node 22 and pnpm but no Docker or Postgres.",
-    Goal: "A Next.js + TypeScript repo where `pnpm install && pnpm dev` runs the whole app, plus a CI file running types, lint, tests, build, audit and a secret scan.",
-    Rules: "§9: one language, one database, one repo; popular libraries; the product must run with zero keys (§9.4 fallbacks).",
-    Constraints: "Real Postgres semantics (not SQLite); no Docker requirement for students.",
-    Proof: "A fresh clone runs on a machine with only Node installed.",
-  }, "(No new prompt. Claude proposed PGlite, Postgres compiled to run inside Node, because the machine had no Docker, and the founder accepted it in Stage 2.)", "HOW THIS STEP STARTED"),
-  ...table(
-    ["Part", "Choice", "Why"],
-    [
-      ["Web + API", "Next.js (App Router), TypeScript strict", "One language end to end"],
-      ["Database", "PGlite (embedded Postgres); real Postgres via `DATABASE_URL`", "No Docker for students; one setting to upgrade"],
-      ["Auth", "Better Auth: email + password, Google when keys exist", "Never hand-rolled crypto"],
-      ["Validation, styling", "Zod, Tailwind on brand tokens", "Popular, well documented"],
-      ["Tests", "Vitest (unit + integration), Playwright (browser)", "§23 defaults"],
-    ],
-    [1900, 4026, 3100],
-  ),
-  p("**The tenancy wall starts here, in the linter.** Feature code is not allowed to import the raw database client:"),
-  ...code([
-    "// eslint.config.mjs",
-    "\"no-restricted-imports\": [\"error\", { paths: [{ name: \"@/db/client\",",
-    "  message: \"Use ctx.s (scoped client) — see docs/ENGINEERING_GUIDE.md §4.\" }] }]",
+  partHead(3, "Decide & lock: one table, one cut line"),
+  h2("3.1 What this stage is for"),
+  p("Every decision the build could get stuck on is made up front and written down with its reason. The **cut line** names what is deliberately left out, so nothing is quietly forgotten. Each feature gets **user stories with acceptance criteria**, and those later become tests."),
+  h2("3.2 Explore prompt"),
+  ...promptBox("EXPLORE", "3.2", "Show the decisions, the cut line and the user stories", {
+    Context: "Campusly repository, built with PLAYBOOK.md; I am studying Stage 2 (Decide & lock).",
+    Goal: "Summarise the locked decisions, what is in and out of Phase 1 (the cut line) with the reason for each, and the user stories with their acceptance criteria. Pick one acceptance criterion and show me the test that checks it.",
+    Rules: "Only what the repository says; name the file for each point.",
+    Constraints: "Do not change any files. Use tables.",
+    Proof: "You show acceptance criterion S-06 AC2 (double-click payment) and the test file and test name that prove it.",
+  }),
+  h2("3.3 What Claude should show you"),
+  ...checklist([
+    ["**16** locked decisions, D-001 to D-016, each with a reason", "docs/DECISIONS.md"],
+    ["The cut line: AI, real email, payment gateway, 2FA, admin console, marketing… each with \"what it would take\"", "docs/PLAN.md"],
+    ["**8** user stories, S-01 to S-08, with Given / When / Then criteria", "docs/PLAN.md"],
+    ["The roles × actions table (who may do what)", "docs/PLAN.md"],
+    ["S-06 AC2 \"exactly one payment\" tested in two places", "tests/integration/exams-fees.test.ts and tests/e2e/journey.spec.ts"],
   ]),
-  ...table(
-    ["Fallback (§9.4)", "What Campusly does with no keys"],
-    [["Email", "Dry run: stored in a mail log and shown at /dev/mail locally"], ["File storage", "A local folder"], ["Google sign-in", "Button hidden"], ["Payments", "Recorded manually; no gateway"]],
-    [2600, 6426],
-  ),
-  audit("`pnpm typecheck` and `pnpm lint` are clean; `.env.example` lists every variable with no values; the app runs with no `.env` at all."),
-  decide("Which stack?", "The most boring, popular option that runs on your users' and students' machines without extra installs. AI writes popular libraries best.", "If everyone already has Docker, use a real Postgres container. If the client mandates a stack, the playbook still applies; only the commands change."),
+  ...verify("Run `pnpm vitest run tests/integration/exams-fees.test.ts`. All tests pass, including *double-click: the same idempotency key records exactly one payment*."),
+  ...decide("What goes below the cut line?", "Anything that needs an account you don't have yet, or that would double the build: payments, AI, a second module, a mobile app.", "If a buyer won't sign without it, move it above the line and move something else down. Record the change."),
 );
 
-// ── STAGE 5 ───────────────────────────────────────────────────────────────────
+// ── Part 4 · Brand ────────────────────────────────────────────────────────────
 add(
-  stage(5, "PLAYBOOK §10 · 0:35–0:50", "Foundations: the parts every feature sits on", "The tenancy wall, one permission function, human codes, audit rows, mail, files, validation, money and time helpers, each with tests **written first and seen failing**."),
-  live("Open `src/lib/can.ts`: one table of who may do what. Then open `tests/unit/money.test.ts` and ask the room why `0.29` is in a test."),
-  prompt(7, "Foundations, tests first", {
-    Context: "Campusly; stack ready; no feature code.",
-    Goal: "Scoped client, `can()`, human codes (STU-0001), audit log, `sendMail()`, file checks, money in minor units, school-local dates, each with unit or integration tests.",
-    Rules: "Must-never 1–3 (tenancy and roles) and 6 (no floats for money).",
-    Constraints: "Write the tests first and run them red before writing code; real Postgres in tests, no mocks.",
-    Proof: "Red then green: show the failing run, then the passing run, with counts.",
-  }, "(Part of \"build the whole application\". Claude ran it from the plan, following §11.2.)", "HOW THIS STEP STARTED"),
-  ...table(
-    ["Foundation", "File", "The idea in one line"],
-    [
-      ["Tenancy wall", "src/db/scoped.ts", "Every query through `ctx.s` gets `school_id = …` added automatically"],
-      ["One permission check", "src/lib/can.ts", "`can(member, action, resource)`; \"own\" grants fail closed"],
-      ["Visibility filter", "loadStudentFor()", "If you can't see it, you get \"not found\", the same as a wrong ID"],
-      ["Human codes", "src/db/codes.ts", "STU-0001 from an atomic counter, never from timestamps"],
-      ["Audit", "src/db/audit.ts", "One row per change: who, what, before/after"],
-      ["Money and time", "src/lib/money.ts, time.ts", "Integer cents; \"today\" in the school's timezone"],
-    ],
-    [2000, 2500, 4526],
-  ),
-  ...code([
-    "$ pnpm vitest run tests/unit          # tests written, code not yet",
-    " Test Files  4 failed (4)",
-    "$ pnpm vitest run tests/unit          # after writing the code",
-    " Test Files  4 passed (4)      Tests  18 passed (18)",
-    "$ pnpm vitest run                     # integration + authorization matrix",
-    " Test Files  9 passed (9)      Tests  119 passed (119)",
+  partHead(4, "Brand: the product has a face"),
+  h2("4.1 What this stage is for"),
+  p("Colours, fonts and corner shapes are defined **once**, as *tokens*, in one file. Screens use only the tokens, so the whole look can change by editing one file. Brand directions are compared as real screens, never as mood boards."),
+  h2("4.2 Explore prompt"),
+  ...promptBox("EXPLORE", "4.2", "Show how the brand is built and switched", {
+    Context: "Campusly repository; I am studying Stage 3 (Brand).",
+    Goal: "Show me where the colours, fonts and corner radius are defined, how dark mode works, how the theme toggle works, and how the four brand kits at /dev/brand were compared. Prove that screens use tokens instead of raw colours.",
+    Rules: "PLAYBOOK §8: components use tokens only.",
+    Constraints: "Do not change any files.",
+    Proof: "You search the screens for hex colour codes (like #0b6e5f) and report how many you find outside the tokens file.",
+  }),
+  h2("4.3 What Claude should show you"),
+  ...checklist([
+    ["All brand tokens (Evergreen) in one place, light and dark", "src/app/globals.css"],
+    ["Fonts: Fraunces for headings, Nunito Sans for text", "src/app/layout.tsx"],
+    ["The sun/moon toggle and the script that sets the theme before the page appears", "src/components/ThemeToggle.tsx, src/app/layout.tsx"],
+    ["Four brand kits compared as real screens", "src/app/dev/brand/ (page.tsx, kits.css)"],
+    ["**Zero** hex colours in the screens", "src/app/s/, src/components/"],
+    ["The decisions: Evergreen chosen; toggle always top-right", "docs/DECISIONS.md D-013, D-014"],
   ]),
-  ...note("A REAL BUG, CAUGHT BY THE MATRIX", "The first green run found one: listing another school's student's documents returned an empty list instead of \"not found\". No data leaked, but it was inconsistent with every other lookup. It became rule INC-001: always load the parent record through the scoped client first."),
-  audit("Every must-never line has at least one test; a user from School B gets \"not found\" for every School A record."),
-  decide("What counts as a foundation?", "Anything every module would otherwise reinvent slightly differently: tenancy, permissions, audit, money, dates, email.", "If only one module needs it, build it inside that module. Foundations are for things that must be identical everywhere."),
+  h2("4.4 See it in the app"),
+  ...fig(IMG + "s03-brand-kits.png", "http://localhost:3000/dev/brand: four brand kits built from the real screens"),
+  ...fig(IMG + "s03c-evergreen-top.png", "Evergreen, the chosen kit: the same screen in light and dark"),
+  ...fig(IMG + "s14-dashboard-dark.png", "Click the moon (top-right) to switch to dark mode; the choice is remembered"),
+  ...verify("Click the sun/moon button on any page and reload: your choice stays. Then run `pnpm exec playwright test tests/e2e/theme.spec.ts` (first time: `pnpm exec playwright install chromium`). **2 passed.**"),
+  ...decide("What should a user feel in the first two seconds?", "Two adjectives you would defend to the buyer, such as \"friendly, trustworthy\". The colour and fonts follow from them.", "If you can't name two, put real screens side by side and let the buyer point."),
 );
 
-// ── STAGE 6 ───────────────────────────────────────────────────────────────────
+// ── Part 5 · Architecture ─────────────────────────────────────────────────────
 add(
-  stage(6, "PLAYBOOK §11 · 0:50–1:05", "Feature slices: the same rhythm, four times", "Students & classes, attendance, exams & report cards and fees, each a complete slice (data → service → screen → tests), plus members, audit log and settings, checked in a real browser in light, dark and at phone width."),
-  live("Sign in as `principal@example.com` and click through every tab. Then sign in as `parent@example.com` and try to open a sibling's page."),
-  prompt(8, "Build one complete slice", {
-    Context: "Campusly; foundations done; this slice is Fees (the others follow the same shape).",
-    Goal: "Bill a whole class or one student, record payments, show paid / partly paid / overdue; parents see their children's invoices; teachers see none.",
-    Rules: "Must-never 5 (no double payment) and 6 (money in cents); fees are staff-only (`can()`).",
-    Constraints: "No payment gateway; brand tokens only; designed empty and error states.",
-    Proof: "A double-clicked payment is stored once; parallel payments can't overpay; the dashboard total reconciles.",
-  }, "(Part of \"build the whole application\". Each slice followed the module pattern below.)", "HOW THIS STEP STARTED"),
-  ...code([
-    "schema (src/db/schema.ts)",
-    "  → service: validate (Zod) → can() → scoped query → audit   (src/lib/services/<module>.ts)",
-    "  → server action: read named fields → call service           (src/app/s/[slug]/actions.ts)",
-    "  → page with empty, loading and error states                 (src/app/s/[slug]/<module>/page.tsx)",
-    "  → integration test + authorization-matrix rows + browser check",
+  partHead(5, "Architecture: few parts, each one boring"),
+  h2("5.1 What this stage is for"),
+  p("The playbook asks for one language, one database, one repository and popular, well-documented tools. The app must also run **with no keys or accounts at all**, using safe stand-ins for email, payments and file storage."),
+  h2("5.2 Explore prompt"),
+  ...promptBox("EXPLORE", "5.2", "Explain the stack and why it runs with no setup", {
+    Context: "Campusly repository; I am studying Stage 4 (Architecture).",
+    Goal: "List the main technologies and what each is for; explain how the database works without installing one; show the lint rule that protects school data; show what runs automatically on GitHub for every change; and list what stands in for email, payments and file storage when there are no keys.",
+    Rules: "PLAYBOOK §9.",
+    Constraints: "Do not change any files. Explain each technology in one line.",
+    Proof: "You show the exact lint rule text and the list of steps in the GitHub workflow file.",
+  }),
+  h2("5.3 What Claude should show you"),
+  ...checklist([
+    ["Next.js 16, React 19, TypeScript, Drizzle, Better Auth, Zod, Tailwind", "package.json"],
+    ["An embedded database (PGlite): real Postgres running inside Node, stored in .data/", "src/db/connect.ts"],
+    ["A lint rule that blocks direct database access outside src/db", "eslint.config.mjs"],
+    ["Every change on GitHub runs: typecheck → lint → tests → browser tests → audit → secret scan", ".github/workflows/ci.yml"],
+    ["Every setting listed, none filled in", ".env.example"],
+    ["Stand-ins: email goes to a local mail log; files to a local folder; no payment gateway", "src/lib/mail.ts, src/lib/files.ts"],
   ]),
-  ...img(IMG + "s05-dashboard-principal.png", "Principal's dashboard. $3,455 outstanding reconciles exactly with the invoices", 6.0),
-  ...img(IMG + "s07-student-leo.png", "A student record: attendance, report card, fees, documents (signed 5-minute links) and edit details", 6.0),
-  ...img(IMG + "s09-attendance.png", "Attendance: one tap per student; saving twice updates, never duplicates", 6.0),
-  ...img(IMG + "s11b-fees-invoices.png", "Fees: paid, partly paid, unpaid and overdue, all in integer cents", 6.0),
-  h2("Same app, different person: what each role sees"),
-  ...img(IMG + "s16-dashboard-teacher.png", "Teacher (Daniel): only Grade 5-A, and only four tabs", 5.6),
-  ...img(IMG + "s18-dashboard-parent.png", "Parent (Maria): one card per child; Leo's 75% = 226 of 300 marks", 5.6),
-  ...img(IMG + "s19-parent-sibling-404.png", "Maria opens Aisha's page by URL and gets \"Not found\", with HTTP 404. No data, no hint that Aisha exists", 5.6),
-  ...note("BUGS THE BROWSER CHECKS FOUND", "(1) Forbidden pages answered HTTP 200 because a loading screen made the page stream; it was removed. (2) The fees page was 669 px wide on a 375 px phone because hidden labels escaped the table's scroll box. (3) Tailwind v4 needed component classes written a new way. Each became a rule in docs/INCIDENT_RULES.md."),
-  ...img(IMG + "s15-phone-fees.png", "Phone width (390 px): no sideways scrolling, 44 px tap targets", 2.6, 5.6),
-  audit("Every screen has an empty, error and no-permission state; no horizontal scroll at 375 px; the numbers reconcile (12 students, $3,455 outstanding, 4 overdue)."),
-  decide("Which slice do I build first?", "The one every other slice depends on: here, students and classes. Attendance, exams and fees all point at a student.", "If a demo is next week, build the slice the buyer will click first, but never leave a half-built screen. Hide it or finish it (§11)."),
+  ...fig(IMG + "s20-mail-sink.png", "http://localhost:3000/dev/mail: emails are never really sent; they appear here"),
+  ...verify("Run `pnpm typecheck` then `pnpm lint`. Both finish **with no errors**."),
+  ...decide("Which technology stack?", "The most boring, popular option that runs on everyone's machine without extra installs. AI writes popular tools best.", "If everyone already has Docker, a separate Postgres database is fine. If a client requires a stack, keep the playbook; only the commands change."),
 );
 
-// ── STAGE 7 ───────────────────────────────────────────────────────────────────
+// ── Part 6 · Foundations ──────────────────────────────────────────────────────
 add(
-  stage(7, "PLAYBOOK §15 · 1:05–1:20", "Quality: tests that would catch a real mistake", "155 automated tests (unit, integration, an authorization matrix and a browser suite against a production build), a live sabotage demo, and a red-team review by a second agent whose findings became tests."),
-  ...table(
-    ["Layer", "Where", "Count"],
-    [["Unit (pure logic)", "tests/unit", "20"], ["Integration (real Postgres)", "tests/integration", "39"], ["Authorization matrix", "tests/integration/authz-matrix.test.ts", "71"], ["Browser (production build)", "tests/e2e", "25"], ["**Total**", "", "**155**"]],
-    [3200, 4626, 1200],
-  ),
-  live("**The sabotage demo (2 minutes).** In `visibleStudents()`, let teachers see every student. Run `pnpm test`. Two tests go red. Undo. Green again. This is the playbook's Stage 10 gate: \"an authorization test fails when a visibility filter is removed\"."),
-  ...code([
-    "if (isStaff(ctx.member) || ctx.member.role === \"teacher\") return ctx.s.findMany(student)   // SABOTAGE",
-    "$ pnpm test",
-    "   × lists never leak across schools or roles",
-    "   × teachers see only their own classes and students",
-    "   Tests  2 failed | 78 passed",
+  partHead(6, "Foundations: the safety walls"),
+  h2("6.1 What this stage is for"),
+  p("Some parts must work the same way in every feature: keeping each school's data separate, checking permissions, numbering records, recording every change, handling money and dates. They are built once, **with tests written first**, before any feature exists."),
+  h2("6.2 Explore prompt"),
+  ...promptBox("EXPLORE", "6.2", "Show the safety walls and their tests", {
+    Context: "Campusly repository; I am studying Stage 5 (Foundations).",
+    Goal: "For each foundation (keeping schools' data separate, the single permission check, student and invoice numbers, the change log, money, dates, file uploads, email) tell me in one sentence what it guarantees, which file holds it, and which test proves it.",
+    Rules: "The six must-never rules in docs/research/SPEC.md.",
+    Constraints: "Do not change any files. Plain language: explain it as you would to a school principal.",
+    Proof: "You run the unit tests and report the number that passed.",
+  }),
+  h2("6.3 What Claude should show you"),
+  ...checklist([
+    ["Every database query is automatically limited to the signed-in user's school", "src/db/scoped.ts"],
+    ["One permission function decides who may do what", "src/lib/can.ts"],
+    ["Records you aren't allowed to see answer \"Not found\", the same as a wrong link", "src/lib/services/students.ts (loadStudentFor)"],
+    ["Student and invoice numbers (STU-0001, INV-0001) can never repeat", "src/db/codes.ts"],
+    ["Every change writes a log row: who, what, before, after", "src/db/audit.ts"],
+    ["Money is stored in whole cents, never decimals; \"today\" is the school's date", "src/lib/money.ts, src/lib/time.ts"],
+    ["Uploads are checked by their real contents, not their file name", "src/lib/files.ts"],
   ]),
-  prompt(9, "Red-team it with a second agent", {
-    Context: "Campusly; all tests green; about to deploy.",
-    Goal: "A list of every way to abuse the app, most severe first, each with file and line, the attack steps and the bad outcome.",
-    Rules: "§15.3: a fresh reviewer, not the author; findings become tests before fixes.",
-    Constraints: "Read-only: don't fix anything; say whether each finding was verified or is a suspicion.",
-    Proof: "Every finding ends as a failing-then-passing test, a founder decision, or a written reason.",
-  }, "List every way to abuse this feature: injection, auth bypass, data leak across workspaces, free-tier abuse, race conditions. Don't fix; list with severity.", "WHAT CLAUDE SENT TO THE REVIEWER AGENT"),
-  ...table(
-    ["Finding (13 in total)", "Severity", "Outcome"],
-    [
-      ["Anyone holding an invite link could sign up as the invitee without proving the email", "High", "Founder: require verified email (D-010)"],
-      ["Admins could create admins; nobody could be removed", "High", "Founder: owner-only admins + removal (D-011)"],
-      ["Unlimited schools per account; no storage cap", "Medium", "Founder: 3 schools, 500 MB (D-012)"],
-      ["Open redirect via a hidden tab character after sign-in", "Medium", "Fixed + tests"],
-      ["Changing currency after invoicing rescaled money", "Medium", "Fixed: currency locked once invoices exist"],
-      ["Client IP header could be spoofed for rate limits", "Medium", "Deferred to deploy (written in the runbook)"],
-      ["7 more (race conditions, token storage, overflow…)", "Low–Medium", "6 fixed, 1 accepted with a reason"],
-    ],
-    [4900, 1400, 2726],
-  ),
-  p("Three findings changed what users can do, so they went to the founder (journal Entry 6). The other ten were technical and fixed without asking. **The reviewer finds problems; it doesn't decide policy.**"),
-  audit("130 unit/integration and 25 browser tests green; removing a filter turns tests red; every red-team finding has an outcome."),
-  decide("Which tests do I write first?", "One per must-never line: the things that would make the buyer stop trusting the app after one incident. Then the journey a real user takes end to end.", "If a reviewer's finding is about *who should be allowed* to do something, it is a product decision. Take it to the founder with a recommendation."),
+  ...code(["$ pnpm vitest run tests/unit", " Test Files  5 passed (5)", "      Tests  20 passed (20)"]),
+  ...verify("Run `pnpm vitest run tests/unit`. **20 passed.** Then ask Claude: *why does tests/unit/money.test.ts check 0.29?* (Hint: type `0.29 * 100` into a JavaScript console.)"),
+  ...decide("What counts as a foundation?", "Anything every feature would otherwise reinvent slightly differently: data separation, permissions, logging, money, dates, email.", "If only one feature needs it, build it inside that feature."),
 );
 
-// ── STAGE 8 ───────────────────────────────────────────────────────────────────
+// ── Part 7 · Feature slices ───────────────────────────────────────────────────
 add(
-  stage(8, "PLAYBOOK §11 · DEMO DATA · 1:20–1:25", "Demo data: every role, every screen, every empty state", "Two schools of fictional people, 11 accounts covering every role and both empty states, 20 school days of attendance, 9 exams and invoices in every status; reset with one command."),
-  prompt(10, "Sample data for every screen and every user", {
-    Context: "Campusly; all screens built; the seed had 4 users.",
-    Goal: "Seed data so every screen shows something for every role, plus accounts that show the empty states, and a second school for multi-school and tenancy demos.",
-    Rules: "§2.2: fictional people at example.com only; seed through the real services so audit rows exist.",
-    Constraints: "Keep the browser tests passing; one command to reset; print counts only.",
-    Proof: "Each account signs in and shows its expected screen; the dashboard numbers reconcile.",
-  }, "setup some sample data for testing for every screen and every type of users"),
-  ...table(
-    ["Account (password campusly-demo-1)", "Role", "What it shows"],
-    [
-      ["principal@example.com", "Owner · admin at Riverside", "Two schools in the picker; every screen"],
-      ["admin@example.com", "Admin", "Everything except inviting admins"],
-      ["teacher@example.com / teacher2@", "Teachers", "Marked today vs not; an unscored student"],
-      ["newteacher@example.com", "Teacher, no class", "Empty state"],
-      ["parent@example.com / parent2@", "Parents", "Two children (one overdue) / one child, paid"],
-      ["newparent@example.com", "Parent, no child", "Empty state"],
-      ["student@example.com / student2@", "Students", "Own record only"],
-      ["riverside@example.com", "Owner, Riverside", "EUR and London time; can never see Maple Grove"],
-    ],
-    [3400, 2300, 3326],
-  ),
-  ...img(IMG + "s20-mail-sink.png", "Local mail sink: no email ever reaches a real inbox (must-never #4); verification and invite links are opened here", 6.0),
-  audit("`pnpm seed:reset` rebuilds everything; 130 + 25 tests still green against the new seed; the parent dashboard shows exactly Leo and Mia."),
-  decide("What makes good demo data?", "Every status a real user will meet: paid, partly paid, overdue; marked and not marked; a student with no class; an account with nothing linked.", "If your demo only shows the happy path, the first real user finds the empty screens for you. Seed them on purpose."),
+  partHead(7, "Feature slices: every screen, every role"),
+  h2("7.1 What this stage is for"),
+  p("Each feature is built as a complete *slice*: data, rules, screen and tests together, one at a time, before the next one starts. Every screen has designed empty, error and no-permission states, and works on a phone."),
+  h2("7.2 Explore prompt"),
+  ...promptBox("EXPLORE", "7.2", "Map the screens, roles and the shape of a feature", {
+    Context: "Campusly repository; I am studying Stage 6 (Feature slices).",
+    Goal: "List every screen with its address and what it is for; which roles can see each one; and, using Fees as the example, walk me through the five layers of a feature from the database to the screen.",
+    Rules: "The roles × actions table in docs/PLAN.md.",
+    Constraints: "Do not change any files. One table for the screens.",
+    Proof: "You give me one demo account per role, and for each account the tabs it should see.",
+  }),
+  h2("7.3 What Claude should show you"),
+  ...checklist([
+    ["11 school screens: dashboard, students, student detail, classes, attendance, exams, marks entry, fees, members, audit log, settings", "src/app/s/[slug]/"],
+    ["One service file per module, holding all the rules", "src/lib/services/ (9 files)"],
+    ["The five layers: database table → service → server action → screen → tests", "docs/ENGINEERING_GUIDE.md §3"],
+    ["Owner: 9 tabs · Teacher: 4 tabs · Parent and student: dashboard only", "src/app/s/[slug]/layout.tsx"],
+  ]),
+  h2("7.4 See it in the app"),
+  p("Signed in as **principal@example.com**:"),
+  ...fig(IMG + "s07-student-leo.png", "A student's record: attendance, report card, fees, documents and editable details"),
+  ...fig(IMG + "s09-attendance.png", "Attendance: one click per student; saving again updates instead of duplicating"),
+  ...fig(IMG + "s11b-fees-invoices.png", "Fees: paid, partly paid, unpaid and overdue invoices"),
+  p("Now the same app as other people:"),
+  ...fig(IMG + "s16-dashboard-teacher.png", "teacher@example.com: only Grade 5-A, and only four tabs", 5.4),
+  ...fig(IMG + "s18-dashboard-parent.png", "parent@example.com: one card per child", 5.4),
+  ...fig(IMG + "s19-parent-sibling-404.png", "The parent pastes another child's link: \"Not found\", with no hint the child exists", 5.4),
+  ...fig(IMG + "s15-phone-fees.png", "On a phone: no sideways scrolling", 2.6, 5.4),
+  ...verify("Sign in as **parent@example.com** and note the two children (Leo and Mia). Then sign in as the principal, open **Aisha Khan**, copy the address, sign back in as the parent and paste it. You should see **Not found**."),
+  ...decide("Which feature do I build first?", "The one everything else depends on. Here, students and classes, because attendance, exams and fees all point to a student.", "If a demo is coming, build the screen the buyer will click first, but never leave a half-built screen: finish it or hide it."),
 );
 
-// ── STAGE 9 ───────────────────────────────────────────────────────────────────
+// ── Part 8 · Quality ──────────────────────────────────────────────────────────
 add(
-  stage(9, "PLAYBOOK §4, §9 · 1:25–1:35", "A repository anyone can pick up", "PLAYBOOK.md and CLAUDE.md in the repo, one-command setup on Mac, Windows and Linux, a non-technical \"Get started\" section, and the code pushed to a private GitHub repository with its full stage-by-stage history."),
-  prompt(11, "Everything a student needs, inside the repo", {
-    Context: "Campusly; students are non-technical and will open the folder in Claude Code.",
-    Goal: "PLAYBOOK.md and a CLAUDE.md that briefs every student's Claude (reading order, commands, rules, how to keep the journal); setup that works on every OS; a README a non-technical student can follow.",
-    Rules: "§4.3: assume every new session has forgotten everything except the files.",
-    Constraints: "No shell tricks that fail on Windows; no secrets in the repo; keep the git history (no ZIP downloads).",
-    Proof: "A fresh clone installs, seeds, signs in and passes the tests.",
-  }, "Make sure that everything is included inside the repo, either that is playbook.markdown file or that is claude.markdown file. Everything should be included inside the repo, so they are able to work on this."),
-  prompt(12, "Create a private repository and push", {
-    Context: "Campusly; 11 commits locally; signed in to GitHub in Chrome.",
-    Goal: "A private GitHub repository named campusly with every commit pushed.",
-    Rules: "§2.1: no secrets in the repo; scan before pushing.",
-    Constraints: "Create it in the browser with the extension; push from the terminal using the machine's existing GitHub login.",
-    Proof: "The repo page shows Private and all commits; the secret scan finds nothing.",
-  }, "now use the browser and create a private repo and push this code there"),
-  ...img(DEP + "04-github-new-private-repo.jpg", "Claude filled in the new-repository form: name, description, Private, no README", 5.6),
-  ...img(DEP + "06-github-code-pushed.jpg", "Pushed over SSH with the Mac's existing GitHub key: the full history, private", 5.6),
-  h2("How students get started (from the README)"),
+  partHead(8, "Quality: tests that would catch a real mistake"),
+  h2("8.1 What this stage is for"),
+  p("Tests are written for the things that would make a school stop trusting the app. There are four layers, and a separate AI reviewer was asked to attack the app; everything it found became a test or a recorded decision."),
+  h2("8.2 Explore prompt"),
+  ...promptBox("EXPLORE", "8.2", "Show the test layers and the security review", {
+    Context: "Campusly repository; I am studying Stage 10 (Quality).",
+    Goal: "Explain the four test layers and how many tests each has; explain the authorization matrix in plain words; summarise what the security review found and what happened to each finding; and list the bugs the tests caught before any user saw them.",
+    Rules: "PLAYBOOK §15.",
+    Constraints: "Do not change any files.",
+    Proof: "You run `pnpm test` and report the totals.",
+  }),
+  h2("8.3 What Claude should show you"),
+  ...checklist([
+    ["Unit **20** · Integration **39** · Authorization matrix **71** · Browser **25**", "tests/unit, tests/integration, tests/e2e"],
+    ["The matrix tries every action as the wrong school and the wrong role, and expects refusal", "tests/integration/authz-matrix.test.ts"],
+    ["13 security findings: 11 fixed, 1 deferred to deployment, 1 accepted with a reason", "docs/DECISION_JOURNAL.md Entry 6, tests/integration/redteam.test.ts"],
+    ["3 bugs caught before release, each turned into a rule", "docs/INCIDENT_RULES.md"],
+  ]),
+  ...code(["$ pnpm test", " Test Files  11 passed (11)", "      Tests  130 passed (130)"]),
+  h2("8.4 Try the sabotage test yourself"),
+  p("This is the most convincing minute of the course: break a safety rule on purpose and watch the tests catch it. This prompt **does** change a file, then puts it back."),
+  ...promptBox("BUILD", "8.4", "Break one rule on purpose, then undo it", {
+    Context: "Campusly repository; tests currently pass.",
+    Goal: "In src/lib/services/students.ts, make visibleStudents() let teachers see every student, run `pnpm test`, show me which tests fail, then undo the change with `git restore` and run the tests again.",
+    Rules: "Must-never #2 and #3 (people only see their own students).",
+    Constraints: "Change only that one line; restore it afterwards.",
+    Proof: "First run: 2 tests fail. After restoring: all 130 pass, and `git status` shows no changes.",
+  }),
+  ...verify("You saw tests named *lists never leak across schools or roles* and *teachers see only their own classes and students* fail, then pass again."),
+  ...decide("Which tests do I write first?", "One for each must-never line, then one for the journey a real user takes from start to finish.", "If a reviewer's finding is about *who should be allowed* to do something, it is a product decision: take it to the founder."),
+);
+
+// ── Part 9 · Demo data ────────────────────────────────────────────────────────
+add(
+  partHead(9, "Demo data: every role, every situation"),
+  h2("9.1 What this stage is for"),
+  p("Good demo data shows every situation a real user will meet, including the empty ones. Campusly creates two fictional schools automatically the first time you run it."),
+  h2("9.2 Explore prompt"),
+  ...promptBox("EXPLORE", "9.2", "List the demo accounts and what each one demonstrates", {
+    Context: "Campusly repository; I want to test every screen as every type of user.",
+    Goal: "List every demo account, its role, and what I should look at when signed in as it; and tell me how to reset the demo data.",
+    Rules: "Only fictional people at example.com.",
+    Constraints: "Do not change any files.",
+    Proof: "Your list matches scripts/seed.ts and the README's Demo data section.",
+  }),
+  h2("9.3 What Claude should show you"),
+  ...checklist([
+    ["11 accounts across 2 schools, all with password campusly-demo-1", "scripts/seed.ts, README.md"],
+    ["A teacher and a parent with nothing linked, to show the empty screens", "newteacher@, newparent@example.com"],
+    ["A principal who belongs to both schools", "principal@example.com"],
+    ["Reset everything: stop the app, then `pnpm seed:reset`", "package.json"],
+  ]),
+  ...verify("Sign in as **newteacher@example.com**: the dashboard says *You don't teach any class yet*. The full list of accounts is in Appendix C."),
+  ...decide("What makes good demo data?", "Every status a real user will meet: paid, partly paid and overdue; marked and not marked; a student with no class; an account with nothing linked.", "If your demo only shows the happy path, your first real user finds the empty screens for you."),
+);
+
+// ── Part 10 · The repository ──────────────────────────────────────────────────
+add(
+  partHead(10, "The repository: how to read a project you didn't write"),
+  h2("10.1 What this stage is for"),
+  p("A project should explain itself to the next person, or the next AI session. Campusly keeps its decisions, plans and rules in files, and its history is one commit per stage."),
+  h2("10.2 Explore prompt"),
+  ...promptBox("EXPLORE", "10.2", "Map the documents and the build history", {
+    Context: "Campusly repository; I want to find my way around it.",
+    Goal: "Explain what each file in docs/ is for, what CLAUDE.md tells you, and walk me through the commit history in order, saying which playbook stage each commit belongs to.",
+    Rules: "PLAYBOOK §2.8 (write it down where the next session will find it).",
+    Constraints: "Do not change any files.",
+    Proof: "You run `git log --oneline --reverse` and map every commit to a stage.",
+  }),
+  h2("10.3 What Claude should show you"),
+  ...checklist([
+    ["The playbook and the AI briefing file", "PLAYBOOK.md, CLAUDE.md"],
+    ["Decisions, plan, decision journal, engineering guide, runbook, incident rules, notes", "docs/"],
+    ["One commit per stage, oldest first, starting with \"Stage 1–2: research, decision journal…\"", "git log"],
+    ["The next step for the project", "docs/NOTES.md (top)"],
+  ]),
+  ...verify("Run `git log --oneline --reverse`. The first commit is *Stage 1–2: research, decision journal, locked decisions, phase-1 plan*."),
+  ...decide("Should the repository be public or private?", "Public if nothing in it is secret and you want free protection of the main branch. Private if the code is commercial.", "With a private repository on GitHub's free plan, anyone you add can change the main branch directly. Use branches and pull requests, as in Part 11."),
+);
+
+// ── Part 11 · Build new features ──────────────────────────────────────────────
+figPart = 11; figNo = 0;
+add(
+  part("Part 11 · Build new features"),
+  p("Now you change the code. Every Build prompt follows the same five lines, and names the rules from Parts 2–8 that the new feature must respect."),
+  h2("11.1 Before every feature"),
   ...steps([
-    "**Get the code with its history.** Use GitHub Desktop → Code → *Open with GitHub Desktop* (not \"Download ZIP\", which drops the history the lessons rely on).",
-    "**Install Node.js** (LTS, 22 or newer) from nodejs.org.",
-    "**Open the folder in Claude Code** and send: *Read this project's README, GUIDE.md and docs folder. Explain what the app does, how it's organised, and how it follows the playbook. Then set it up and run it for me.*",
+    "Make sure the app's tests pass: `pnpm test`.",
+    "Ask Claude: *Create a new git branch called feature/<short-name> and switch to it.*",
+    "Send the Build prompt. **Read the plan Claude shows you** before saying \"go\". If something in it changes what users see and the prompt didn't decide it, Claude should ask you.",
   ]),
-  audit("Fresh clone: installed in 3 s, seeded on first `pnpm dev`, demo sign-in returned 200, 130 tests passed. `git grep` finds no keys or tokens."),
-  decide("Public or private repository?", "Public if nothing in it is secret and you want branch protection on GitHub's free plan. Private if the code is commercial.", "With a private repo on the free plan, anyone added as a collaborator can push to `main`. Use forks and pull requests instead, or a paid plan."),
-);
-
-// ── STAGE 10 ──────────────────────────────────────────────────────────────────
-add(
-  stage(10, "PLAYBOOK §16 · STAGE 11 · 1:35–1:55 · IN PROGRESS", "Deploy on AWS: the agent clicks, the human approves", "A $25 budget alarm, a read-only GitHub token, and an AWS Lightsail server in Mumbai with a fixed IP and HTTPS open. The site going live is the first item for the next session."),
-  prompt(13, "Deploy it, doing as much as allowed", {
-    Context: "Campusly; tests green; a new AWS account with free credits; the Claude in Chrome extension connected.",
-    Goal: "The app live on an HTTPS address that students can open, at the lowest monthly cost.",
-    Rules: "§2.4: the agent never creates accounts, enters card details, types passwords, accepts terms or handles secret tokens; billing steps need the human's click.",
-    Constraints: "Demo mode on the public site (sign-up closed, demo accounts listed); budget alarm before anything that costs money; scripts tested locally first.",
-    Proof: "https://campusly.35-154-168-246.sslip.io answers, and a demo account signs in from a phone.",
-  }, "Let's try to create the AWS account for me. Use extensions, perform most of the tasks by yourself, ask me to take action only when it is required."),
-  ...table(
-    ["Decision", "Choice", "Why"],
-    [
-      ["Host", "AWS Lightsail, $12/month (2 GB)", "Fewest screens, fixed price; the build needs 2 GB"],
-      ["Region", "Mumbai (ap-south-1)", "Closest to the students"],
-      ["Address", "Free sslip.io name with automatic HTTPS", "No domain to buy, no DNS"],
-      ["Sign-up on the live site", "Closed: demo accounts only", "No email service yet to verify new accounts"],
-    ],
-    [2300, 3226, 3500],
-  ),
-  ...table(
-    ["Claude did (through the extension)", "The founder did"],
-    [
-      ["Opened every page and filled every form", "Created the AWS account: email, password, card, phone"],
-      ["Budget alarm: Monthly cost budget, $25", "Typed their own email for alerts"],
-      ["Token form: one repo, read-only, 90 days", "Confirmed their GitHub password; generated and copied the token"],
-      ["Lightsail form: Mumbai, Ubuntu 24.04, $12, launch script", "Pasted the token; clicked **Create instance** (the billing step)"],
-      ["Static IP and HTTPS firewall rule", ""],
-    ],
-    [4513, 4513],
-  ),
-  ...img(DEP + "03-budget-monthly-25.jpg", "Step 1: a $25 monthly budget alarm, set before anything costs money", 5.6),
-  ...img(DEP + "08-github-token-readonly.jpg", "Step 2: a token that can only read this one repository, for 90 days", 5.6),
-  ...img(DEP + "11-lightsail-plan-12.png", "Step 3: the $12 plan. Claude first mis-clicked the $164 plan when the page shifted, and caught it in the next screenshot", 5.0),
-  ...img(DEP + "13-lightsail-launch-script.jpg", "Step 4: the launch script installs Node, Caddy (HTTPS) and the app on first boot", 5.6),
-  ...img(DEP + "16-static-ip-attached.jpg", "Step 5: a fixed IP, so the address never changes", 5.6),
-  ...img(DEP + "17-firewall-https-443.jpg", "Step 6: open HTTPS (port 443) to the internet", 5.6),
-  ...note("TWO REAL HICCUPS, KEPT FOR TEACHING", "(1) The first **Create instance** click happened in another window and created nothing; Claude checked the instance list, found it empty, and refilled the form. (2) Claude's click landed on the **$164** plan when the page shifted; the next screenshot caught it before anything was created. Lesson: **always re-check the plan, and check the list after creating.**"),
-  ...note("STATUS", "The server is running and both AWS health checks pass, but the site did not answer about 20 minutes after creation, and Lightsail's browser terminal refused to log in. Diagnosing it from the setup log is the first task next time; the full click-by-click guide is in `docs/DEPLOY_AWS.md`.", ACCENT_SOFT, ACCENT),
-  decide("Which host, and which plan?", "The cheapest single server that can build and run the app (here 2 GB of memory). Free credits are account-wide, so cheaper means they last longer.", "If no one on the team will look after a server, choose a managed platform and accept the higher monthly cost. Write the trade-off down."),
-);
-
-// ── Result / Practice / Troubleshooting / What's next ─────────────────────────
-add(
-  h1("4. Result so far", true),
-  p("One vague sentence became Campusly: a multi-school app with four modules and five roles, a brand chosen from real screens, **155 tests** including an authorization matrix and a red-team review, **13 commits** that mirror the playbook stages, a decision journal of every question the founder answered, a repository a non-technical student can run with one prompt, and an AWS server one step from live."),
-  p("More important than the app: **13 prompts** you can reread, each shown as what was typed next to the five-line version, and **ten decision boxes** that tell you how to make the same call on your own idea."),
-  h1("5. Practice: on your own idea, this week"),
+  h2("11.2 After every feature"),
   ...steps([
-    "**Stages 1–2 (one hour).** Put PLAYBOOK.md in an empty folder and type your idea in one sentence. Answer Claude's questions; keep a decision journal. Stop when a stranger can read your PLAN.md and say what ships.",
-    "**Stage 3 (30 minutes).** Ask for four brand kits as real screens and pick one. Check that no colour appears outside the tokens file.",
-    "**Stages 5–6 (an evening).** Write your must-never list first, ask for a failing test per line, then build one complete slice.",
-    "**Stage 10 (30 minutes).** Do the sabotage demo on your own app: remove one permission check and make sure a test goes red.",
+    "Check the **Proof** line yourself in the app.",
+    "Ask Claude: *Run pnpm typecheck, pnpm lint and pnpm test, then commit with a message that says what was verified.*",
+    "Ask Claude: *Push the branch and open a pull request.* (Or use GitHub Desktop: **Push origin**, then **Create Pull Request**.)",
   ]),
-  h1("6. When things go wrong (all of these happened in this build)"),
   ...table(
-    ["What happens", "Why", "What to do"],
+    ["Feature", "Size", "Main skill it practises"],
     [
-      ["The linter crashes: \"typescript-eslint does not support TS 7\"", "The newest TypeScript was ahead of the linter", "Pin TypeScript 6. Boring and working beats new"],
-      ["\"Cannot apply unknown utility class btn\"", "Tailwind v4 changed how custom classes are written", "Use `@utility` blocks; don't name one `table`"],
-      ["Migrations \"can't find meta/_journal.json\"", "A space in the folder path became %20", "Build paths with `path.join(process.cwd(), …)`"],
-      ["Forbidden pages return HTTP 200", "A loading screen makes the page stream before the check", "Remove it from pages that check permissions"],
-      ["The page scrolls sideways on phones", "Hidden labels escaped the table's scroll box", "Make every scroll box `position: relative`"],
-      ["Sign-in returns 429 in a screenshot script", "The 5-per-minute sign-in limit is working", "Space out sign-ins; never raise the limit in production"],
-      ["GitHub keeps asking for the password", "Confirmed in a different tab or window", "Confirm in the tab the agent is using"],
-      ["Lightsail list is empty after \"Create\"", "The click happened in another window", "Check the list; refill the form in the agent's tab"],
-      ["Browser SSH: CLIENT_UNAUTHORIZED [769]", "First-boot setup still running, or the setup failed", "Wait and retry; then read /var/log/campusly-install.log"],
+      ["11.3 Class notice board", "Small (the instructor builds this one first)", "A full slice: table, rules, screen, tests"],
+      ["11.4 Archive a student", "Small", "Changing a record without losing its history"],
+      ["11.5 Attendance export to CSV", "Small", "Safe file export"],
+      ["11.6 Printable report card", "Small", "Printing and accessibility"],
+      ["11.7 Absence alerts for parents", "Medium", "Notifications, permissions"],
+      ["11.8 Timetable", "Medium", "Asking the founder before building"],
+      ["11.9 Import students from CSV", "Medium", "Messy input, all-or-nothing writes"],
+      ["11.10 AI report-card comments", "Medium", "Using AI safely (playbook Stage 7)"],
+    ],
+    [3300, 2800, 2926],
+  ),
+);
+
+const features = [
+  ["11.3", "Class notice board", "Teachers post notices to the classes they teach; admins post to any class or the whole school; parents and students see the notices for their children's or their own class on the dashboard.", "Must-never #1–#3 (each school, class and family sees only its own notices); one permission check in src/lib/can.ts.", "New table with school_id and a database migration (`pnpm db:generate --name notices`); follow the module pattern in docs/ENGINEERING_GUIDE.md; audit every post; titles max 120 characters, text max 2,000; brand tokens only.", "A teacher posts to Grade 5-A; parent@example.com sees it on the dashboard for Leo but not for Mia (Grade 6-B); a teacher cannot post to a class they don't teach (a test proves it); new rows added to the authorization matrix; all tests pass."],
+  ["11.4", "Archive a student", "Staff can archive a student who has left. Archived students disappear from lists, attendance and billing, but their record, marks and invoices stay readable, and staff can restore them.", "Must-never #1 (scoped to the school); only staff may archive (can()).", "Do not delete any data; add an archived date rather than removing rows; existing invoices are unchanged; audit archive and restore.", "Archive Kai Müller: he disappears from the students list and from billing a class; his page is still reachable by staff with an \"Archived\" badge; restore brings him back; tests cover both."],
+  ["11.5", "Attendance export to CSV", "Staff and the class teacher can download a class's attendance for a date range as a CSV file.", "Teachers only for their own classes; must-never #1.", "Escape any cell that starts with =, +, - or @ so spreadsheets can't run it as a formula; dates in the school's timezone; no new database tables.", "First admit a test student named \"=SUM(1)\" into Grade 5-A. Download Grade 5-A for the last two weeks and open it in a spreadsheet: one row per student per day, and \"=SUM(1)\" shows as plain text, not a formula; a teacher cannot export Grade 6-B (test)."],
+  ["11.6", "Printable report card", "A clean, printable report card page for a student, with the school name, the student, every exam with percentage, the overall percentage and attendance.", "The same visibility as the report card: staff, the class teacher, the student's parents and the student only.", "Use the existing report-card data, not new calculations; print styles only (no PDF library); readable in black and white; no navigation or buttons on paper.", "As parent@example.com, open Leo's printable report card and print preview it: one A4 page, overall 75%; opening Aisha's printable card gives Not found."],
+  ["11.7", "Absence alerts for parents", "When a student is marked absent, their parents get an in-app notification (a bell with a count) the next time they open Campusly. Email is not part of this feature.", "Parents see only alerts about their own children; must-never #4 (no real email is sent).", "New notifications table with school_id; created in the same step as saving attendance; saving the same absence twice must not create two alerts; mark as read.", "Mark Leo absent today as teacher@example.com; parent@example.com sees one alert; saving attendance again does not add a second; parent2@example.com sees nothing."],
+  ["11.8", "Timetable", "A weekly timetable per class (day, period, subject, teacher) that staff edit, teachers see for their classes, and parents and students see for their own class.", "Teachers only for classes they teach; must-never #1.", "**Before planning, ask me the decisions a school would notice, one at a time, with options and your recommendation:** how many periods per day, whether periods have fixed times, what happens when a teacher is booked twice. Record my answers in docs/DECISION_JOURNAL.md and docs/DECISIONS.md.", "The journal has a new entry with my answers; a teacher cannot be booked in two classes in the same period (test); parent@example.com sees Grade 5-A's timetable for Leo."],
+  ["11.9", "Import students from a CSV file", "Staff upload a CSV of students (first name, last name, date of birth, class) and see a preview with problems marked before anything is saved.", "Only staff; the plan's student limit still applies; student codes are still unique.", "Either every row is saved or none is; reject wrong or missing columns with a clear message; accept names with accents, apostrophes and other scripts; handle a file saved from Excel (UTF-8 with a BOM); maximum 500 rows.", "Import a file of 5 students with one bad date: the preview flags that row and nothing is saved; fix it and import: 5 new students with the next STU codes; a test covers the all-or-nothing rule."],
+  ["11.10", "AI report-card comments", "On a student's report card, staff and the class teacher can click \"Draft comment\". Claude drafts a short, encouraging comment from the marks and attendance; the teacher edits and approves it before anyone else sees it.", "PLAYBOOK Stage 7: AI output is a draft that a human approves; only marks and attendance are sent, with no names or contact details; teachers only for their own classes.", "Read the API key from `ANTHROPIC_API_KEY` in .env (I add it myself; never ask me to paste it into the chat); put the model name in an environment setting, not in the code; if there is no key, show a clearly labelled sample draft; record each call (who, when, how long it took) without storing the student's data in the log; label approved comments \"AI-assisted\".", "With no key, the button shows a labelled sample draft; with a key, a real draft appears in a few seconds; nothing is visible to parents until the teacher approves it; a test proves a teacher can't draft for another class."],
+];
+for (const [id, title, goal, rules, constraints, proof] of features) {
+  add(
+    h2(`${id} ${title}`),
+    ...promptBox("BUILD", id, title, { Context: "Campusly repository on a new feature branch; CLAUDE.md and the module pattern in docs/ENGINEERING_GUIDE.md apply.", Goal: goal, Rules: rules, Constraints: constraints, Proof: proof }),
+  );
+}
+add(...box("WHEN THE INSTRUCTOR DEMONSTRATES 11.3", "Watch for three things: Claude reads CLAUDE.md before planning; the plan lists the new tests **before** the code; and the finished feature adds rows to the authorization matrix. Those three habits are what you repeat in 11.4 to 11.10."));
+
+// ── Part 12 · Troubleshooting ─────────────────────────────────────────────────
+add(
+  partHead(12, "When things go wrong"),
+  ...table(
+    ["What you see", "Why", "What to do"],
+    [
+      ["`pnpm: command not found`", "pnpm isn't switched on yet", "Run `corepack enable`, or ask Claude to install pnpm"],
+      ["The page at localhost:3000 doesn't open", "The app isn't running", "Run `pnpm dev` and wait for \"Ready\""],
+      ["Sign-in says \"Too many attempts\"", "Sign-in is limited to 5 tries a minute (a security rule)", "Wait one minute and try again"],
+      ["`pnpm seed:reset` fails or the data looks broken", "The app is still running and holding the database", "Stop `pnpm dev` first, then run it again"],
+      ["Browser tests fail before starting", "The test browser isn't installed", "Run `pnpm exec playwright install chromium`"],
+      ["A Build prompt's plan changes something users see that you didn't decide", "The prompt left a decision open", "Stop. Decide it yourself, or ask Claude for options and a recommendation"],
+      ["Tests fail after your feature", "The new code broke an existing rule", "Ask Claude to explain the failing test before changing anything; never weaken a test to make it pass"],
+      ["You changed something by accident", "", "Ask Claude: *show me git status, then restore the files I didn't mean to change*"],
     ],
     [3000, 3013, 3013],
   ),
-  h1("7. What comes next (added after the live session)"),
-  ...bullets([
-    "**Finish the deploy:** read the server's setup log, bring the site live, test it from a phone, and add the screenshots to this guide.",
-    "**Build together, using the same five-line prompts:** a class notice board (shown live first), AI report-card comments (Stage 7: AI behind a provider switch, human review), a timetable, student CSV import, absence alerts for parents, CSV export, a printable report card, and archiving students.",
-    "**Open decisions for the founder:** the Campusly domain and trademark check; when 2FA becomes mandatory; how students get repository access.",
+);
+
+// ── Part 13 · Deploy (instructor demonstration) ───────────────────────────────
+add(
+  partHead(13, "Deploy to AWS (instructor demonstration)", "You don't need an AWS account for this course. This part shows how the instructor put Campusly on a server, with Claude doing the clicking through the Claude in Chrome extension. The final step, the site going live, is completed in class and added here afterwards."),
+  h2("13.1 Decisions"),
+  ...table(
+    ["Decision", "Choice", "Why"],
+    [
+      ["Host", "AWS Lightsail, $12/month plan (2 GB memory)", "Simplest screens and a fixed price; the app's build needs 2 GB"],
+      ["Region", "Mumbai (ap-south-1)", "Closest to the students"],
+      ["Web address", "A free sslip.io address with automatic HTTPS", "No domain to buy"],
+      ["Sign-up on the public site", "Closed; demo accounts only", "There is no email service yet to verify new accounts"],
+    ],
+    [2300, 3226, 3500],
+  ),
+  h2("13.2 Who does what"),
+  p("The playbook never lets an AI create accounts, enter card details, type passwords or handle secret keys. So the work is split:"),
+  ...table(
+    ["Claude (through the browser extension)", "The person"],
+    [
+      ["Opens every page and fills in every form", "Creates the AWS account: email, password, card, phone"],
+      ["Sets up a $25 monthly budget alarm", "Types their own email for the alerts"],
+      ["Creates the private GitHub repository and fills in the token form", "Confirms the GitHub password; generates and copies the token"],
+      ["Fills in the server form, the fixed IP and the firewall rule", "Pastes the token and clicks Create (the step that costs money)"],
+    ],
+    [4513, 4513],
+  ),
+  h2("13.3 The steps"),
+  ...steps([
+    "**Budget alarm first.** Billing → Budgets → Monthly cost budget, $25.",
+    "**Code on GitHub.** A private repository, with a read-only token that can only read this one repository for 90 days.",
+    "**Create the server.** Lightsail → Mumbai → Ubuntu 24.04 → the $12 plan → a launch script that installs and starts the app on first boot.",
+    "**Fixed IP and HTTPS.** Attach a static IP so the address never changes, and open port 443.",
+    "**Go live** (in class): check the address, sign in from a phone, and add the result to this guide.",
   ]),
+  ...fig(DEP + "03-budget-monthly-25.jpg", "Step 1: the budget alarm, set before anything costs money", 5.6),
+  ...fig(DEP + "08-github-token-readonly.jpg", "Step 2: a token that can only read this one repository", 5.6),
+  ...fig(DEP + "11-lightsail-plan-12.png", "Step 3: the $12 plan; always re-check the plan before clicking Create", 5.0),
+  ...fig(DEP + "13-lightsail-launch-script.jpg", "Step 3: the launch script that sets up the server by itself", 5.6),
+  ...fig(DEP + "16-static-ip-attached.jpg", "Step 4: a fixed IP address", 5.6),
+  ...box("A MISTAKE WORTH REMEMBERING", "While Claude was clicking, the page shifted and the **$164** plan got selected instead of $12. The next screenshot caught it before anything was created. Whether a person or an AI is clicking, **re-read the summary before any button that costs money.**", WARN, WARN_INK),
+  p("The full click-by-click record, with every screenshot, is in `docs/DEPLOY_AWS.md`."),
 );
 
 // ── Appendices ────────────────────────────────────────────────────────────────
+figPart = 99;
 add(
-  h1("Appendix A: CLAUDE.md, the part that matters", true),
-  p("Claude Code reads this file automatically whenever someone opens the folder, so every student's assistant starts with the same rules. The full file is in the repository."),
+  part("Appendix A · The rules Claude follows in this repository"),
+  p("From **CLAUDE.md**, which Claude Code reads automatically when you open the folder."),
   ...code([
-    "## Rules that are easy to break (each is enforced by lint or tests)",
+    "Rules that are easy to break (each is enforced by lint or tests)",
     "- Tenancy wall: feature code reads/writes only via ctx.s (src/db/scoped.ts).",
     "- One permission check: can() in src/lib/can.ts. A new action → GRANTS, the roles",
     "  table in docs/PLAN.md, tests/unit/can.test.ts, and rows in the authz matrix.",
@@ -653,33 +647,51 @@ add(
     "- Tests first: write them, run them, see them fail, then build.",
     "- Money is integer minor units; dates are school-local.",
     "- Mail only through sendMail(). Colours/fonts only through tokens.",
+    "- The sun/moon theme toggle stays fixed top-right on every page.",
     "",
-    "## Working with the founder",
+    "Working with the founder",
     "- Anything a school, parent or student could notice is the founder's call: ask one",
     "  question at a time, with options and one recommendation.",
-    "- Keep the teaching log going: add every question and answer to",
-    "  docs/DECISION_JOURNAL.md, and locked decisions to docs/DECISIONS.md.",
+    "- Add every question and answer to docs/DECISION_JOURNAL.md.",
   ]),
-  h1("Appendix B: The prompt template and the decision checklist"),
-  p("Fill the five lines before every prompt. If you can't fill the Proof line, you aren't ready to type the prompt."),
+  h2("Appendix B · Blank prompt templates"),
+  label("EXPLORE (read-only)"),
+  ...table(["Line", "Your prompt"], [["Context", "This is the ___ repository; I am studying ___, not changing it."], ["Goal", " "], ["Rules", "Only report what is in the repository; name the file for every fact."], ["Constraints", "Do not change any files."], ["Proof", " "], ["", "**Plan first.**"]], [1800, 7226]),
+  label("BUILD (changes code)"),
+  ...table(["Line", "Your prompt"], [["Context", "___ repository on a new branch; CLAUDE.md applies."], ["Goal", " "], ["Rules", "Which must-never rules and permission rules apply?"], ["Constraints", "What must not change? What is out of scope?"], ["Proof", "What will I check in the app, and which test proves it?"], ["", "**Plan first.**"]], [1800, 7226]),
+  h2("Appendix C · Demo accounts"),
+  p("Every password is **campusly-demo-1**. All people are fictional."),
   ...table(
-    ["Line", "Your prompt"],
-    [["Context", " "], ["Goal", " "], ["Rules", " "], ["Constraints", " "], ["Proof", " "], ["", "**Plan first.**"]],
-    [1800, 7226],
+    ["Account", "Role", "What to look at"],
+    [
+      ["principal@example.com", "Owner of Maple Grove; admin at Riverside", "Two schools; every screen"],
+      ["admin@example.com", "Admin", "Everything except inviting admins"],
+      ["teacher@example.com", "Teacher, Grade 5-A", "Attendance marked today; four exams"],
+      ["teacher2@example.com", "Teacher, Grade 6-B", "Not marked today; a student who missed an exam"],
+      ["newteacher@example.com", "Teacher with no class", "Empty screens"],
+      ["parent@example.com", "Parent of Leo and Mia", "Two children; Mia's fees overdue"],
+      ["parent2@example.com", "Parent of Aisha", "One child, fees paid"],
+      ["newparent@example.com", "Parent, no child linked", "Empty screen"],
+      ["student@example.com", "Student (Leo Santos)", "Own record only"],
+      ["student2@example.com", "Student (Aisha Khan)", "Own record only"],
+      ["riverside@example.com", "Owner of Riverside Academy", "Euros, London time; can't see Maple Grove"],
+    ],
+    [2900, 3000, 3126],
   ),
+  h2("Appendix D · The decision checklist"),
   ...table(
     ["Decision", "The question to ask", "The signal"],
     [
-      ["Customer", "One organisation, or many?", "A second customer ever → tenant ID from day one"],
+      ["Customer", "One organisation, or many?", "A second customer ever → mark every record's owner from day one"],
       ["Cut line", "What would double the build?", "Needs an account you don't have, or a second module"],
-      ["Brand", "What should users feel in two seconds?", "Two adjectives you'd defend; pick from real screens"],
-      ["Stack", "What runs on everyone's machine?", "Boring, popular, one language, zero extra installs"],
-      ["Foundations", "What would every module reinvent?", "Tenancy, permissions, audit, money, dates, email"],
-      ["First slice", "What does everything depend on?", "Students and classes"],
-      ["Tests", "What breaks the buyer's trust?", "One test per must-never line, then the journey"],
-      ["Demo data", "Which states will real users meet?", "Every status, plus the empty ones"],
+      ["Brand", "What should users feel in two seconds?", "Two adjectives; pick from real screens"],
+      ["Stack", "What runs on everyone's machine?", "Boring, popular, one language, no extra installs"],
+      ["Foundations", "What would every feature reinvent?", "Data separation, permissions, logging, money, dates"],
+      ["First feature", "What does everything depend on?", "Here: students and classes"],
+      ["Tests", "What breaks the buyer's trust?", "One test per must-never line, then the full journey"],
+      ["Demo data", "Which situations will real users meet?", "Every status, plus the empty ones"],
       ["Repository", "Public or private?", "Secrets? Branch protection on your plan?"],
-      ["Host", "Cheapest box that builds the app?", "Memory for the build; credits last longer when cheaper"],
+      ["Host", "Cheapest server that can build the app?", "Enough memory for the build; cheaper means the credit lasts longer"],
     ],
     [1700, 3500, 3826],
   ),
@@ -691,32 +703,30 @@ const numbering = {
     { reference: "bullets", levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 270 } } } }] },
     ...Array.from({ length: listCounter }, (_, i) => ({
       reference: `steps${i + 1}`,
-      levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 300 } }, run: { bold: true, color: ACCENT } } }],
+      levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 300 } }, run: { bold: true, color: ACCENT, font: FONT } } }],
     })),
   ],
 };
 
 const doc = new Document({
   creator: "Instructor",
-  title: "Idea to Live: Building Campusly with Claude Code and the Playbook",
+  title: "Idea to Live: Campusly with Claude Code and the Playbook",
   description: "Live session guided document",
   styles: {
     default: { document: { run: { font: FONT, size: 21, color: INK } } },
     paragraphStyles: [
       { id: "Title", name: "Title", basedOn: "Normal", next: "Normal", run: { size: 44, bold: true, color: INK, font: FONT }, paragraph: { spacing: { after: 160 } } },
-      { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true, run: { size: 32, bold: true, color: INK, font: FONT }, paragraph: { spacing: { before: 200, after: 120 }, outlineLevel: 0, keepNext: true } },
-      { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true, run: { size: 24, bold: true, color: ACCENT, font: FONT }, paragraph: { spacing: { before: 220, after: 100 }, outlineLevel: 1, keepNext: true } },
+      { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true, run: { size: 32, bold: true, color: INK, font: FONT }, paragraph: { spacing: { before: 120, after: 160 }, outlineLevel: 0, keepNext: true } },
+      { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true, run: { size: 24, bold: true, color: ACCENT, font: FONT }, paragraph: { spacing: { before: 240, after: 100 }, outlineLevel: 1, keepNext: true } },
     ],
   },
   numbering,
-  sections: [
-    {
-      properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1300, bottom: 1200, left: 1440, right: 1440 } } },
-      headers: { default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [TR({ text: "AI Operator · Live Session · Idea to Live: Campusly", size: 16, color: MUTED })] })] }) },
-      footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [TR({ text: "Page ", size: 16, color: MUTED }), TR({ children: [PageNumber.CURRENT], size: 16, color: MUTED })] })] }) },
-      children: C,
-    },
-  ],
+  sections: [{
+    properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1300, bottom: 1200, left: 1440, right: 1440 } } },
+    headers: { default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [TR({ text: "AI Operator · Live Session · Idea to Live: Campusly", size: 16, color: MUTED })] })] }) },
+    footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [TR({ text: "Page ", size: 16, color: MUTED }), TR({ children: [PageNumber.CURRENT], size: 16, color: MUTED })] })] }) },
+    children: C,
+  }],
 });
 
 Packer.toBuffer(doc).then((buf) => {

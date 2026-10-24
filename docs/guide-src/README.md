@@ -7,7 +7,7 @@
 - `build-guide.cjs` — builds the .docx from those screenshots and `docs/deploy/img/`.
 
 ```bash
-cd docs/guide-src && npm init -y && npm install docx@9      # once, outside the app's dependencies
+cd docs/guide-src && npm init -y && npm install docx@9      # once; or point NODE_PATH at a folder that has docx
 PROJECT="$(cd ../.. && pwd)" node capture-screens.cjs      # optional: refresh screenshots
 PROJECT="$(cd ../.. && pwd)" node build-guide.cjs
 ```
