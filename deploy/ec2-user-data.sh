@@ -1,13 +1,16 @@
 #!/bin/bash
-# Paste this into Lightsail → Create instance → "Add launch script".
+# Paste this into EC2 → Launch instance → Advanced details → "User data".
 # It runs once, as root, on the server's first boot (about 10 minutes until the site is up).
+# Progress: /var/log/cloud-init-output.log, then /var/log/campusly-install.log ("CAMPUSLY READY" at the end).
 #
 # PRIVATE repo: paste a read-only GitHub token below (Settings → Developer settings → Fine-grained tokens:
 # only this repository, Contents = Read-only). PUBLIC repo: leave it empty.
 GITHUB_TOKEN=""
 REPO="github.com/shivavashishtha/campusly.git"
 
-apt-get update -y && apt-get install -y git
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
+# Ubuntu runs its own security updates on first boot; wait for them instead of failing on the apt lock.
+apt-get -o DPkg::Lock::Timeout=900 update -y && apt-get -o DPkg::Lock::Timeout=900 install -y git
 if [ -n "$GITHUB_TOKEN" ]; then URL="https://x-access-token:${GITHUB_TOKEN}@${REPO}"; else URL="https://${REPO}"; fi
 git clone "$URL" /opt/campusly
 chmod 600 /opt/campusly/.git/config   # the token is kept here so `campusly-update` can pull later
