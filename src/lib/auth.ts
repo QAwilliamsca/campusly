@@ -6,6 +6,7 @@ import * as schema from "@/db/schema";
 import { sendMail } from "./mail";
 import { serverSecret } from "./secret";
 import { appUrl } from "./url";
+import { demoMode } from "./demo";
 
 export const googleEnabled = () => !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
@@ -19,6 +20,7 @@ async function create() {
       enabled: true,
       minPasswordLength: 10,
       requireEmailVerification: true, // D-010
+      disableSignUp: demoMode(), // D-015: public demo uses seeded accounts only
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: ({ user, url }) => sendMail(db, { to: user.email, template: "reset-password", subject: "Reset your Campusly password", text: `Reset your password: ${url}\n\nIf you didn't ask for this, ignore this email.` }),
     },

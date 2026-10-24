@@ -109,3 +109,18 @@ Decision: Every page shows a sun/moon toggle fixed to the top-right corner. The 
 a click switches and is remembered in that browser.
 Affects: root layout (toggle + pre-paint script), dark tokens keyed on `<html data-theme>`, header right padding.
 Reopen only if: the founder changes it.
+
+## D-015 — Public demo runs in demo mode: sign-up closed, demo accounts listed
+Date: 2026-10-24   Decided by: Agent default (recommended option; founder may overturn)   Stage: 8/11
+Decision: `DEMO_MODE=1` on the server closes sign-up (UI and API) and lists the seeded accounts on the sign-in page.
+Reason: D-010 needs a verified email and there is no mail provider yet; this keeps red-team #1 closed on a public site.
+Known risk: anyone can sign in as a demo user and edit demo data. `sudo campusly-reset-demo` restores it.
+
+## D-016 — Hosting: one AWS Lightsail server in Mumbai, free sslip.io HTTPS address, embedded database
+Date: 2026-10-24   Decided by: Agent default (recommended options; founder may overturn)   Stage: 11
+Decision: Ubuntu 24.04 Lightsail instance (2 GB plan) in ap-south-1 with a static IP; Caddy for automatic HTTPS on
+`campusly.<ip-with-dashes>.sslip.io`; PGlite data in `/var/lib/campusly` (single app process, fine for a demo).
+Options considered: Lightsail · EC2 + Docker · App Runner + RDS; PGlite vs managed Postgres.
+Reason: lowest monthly cost from the sign-up credit, fewest console screens for a live class, no extra services.
+Upgrade path: set `DATABASE_URL` to a Postgres (e.g. Lightsail database) — no code change.
+Affects: `deploy/` scripts, docs/DEPLOY_AWS.md.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Campusly: work out the public address and write settings
+Wants=network-online.target
+After=network-online.target
+Before=campusly.service caddy.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/campusly/deploy/configure.sh
+
+[Install]
+WantedBy=multi-user.target
