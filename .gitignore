@@ -8,3 +8,5 @@ next-env.d.ts
 playwright-report/
 test-results/
 .DS_Store
+docs/guide-src/node_modules/
+docs/guide-src/package*.json
