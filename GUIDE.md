@@ -4,7 +4,7 @@
 > through it, stage by stage, and see how each rule in `PLAYBOOK.md` turned into a file, a test or a decision.
 >
 > For every stage you get: **what the playbook asks** → **what was done** → **where it lives** (files and the git
-> commit) → **try it yourself**. Keep three tabs open: this guide, `PLAYBOOK.md`, and
+> commit) → **try it yourself**. Keep three tabs open: this guide, [`PLAYBOOK.md`](PLAYBOOK.md) (in this repo), and
 > [`docs/DECISION_JOURNAL.md`](docs/DECISION_JOURNAL.md) (every question the agent asked the founder).
 
 ```bash

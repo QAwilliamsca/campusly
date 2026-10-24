@@ -3,22 +3,43 @@
 A multi-school SaaS where admins, teachers, parents and students see the same, correct record of each student's
 **attendance, marks and fees**, each seeing only what they're allowed to.
 
-Built step by step with an AI agent following the course playbook (`PLAYBOOK.md`, shared by your instructor). This repo is a teaching case: read
+Built step by step with an AI agent following [`PLAYBOOK.md`](PLAYBOOK.md). This repo is a teaching case: read
 [`GUIDE.md`](GUIDE.md) for the stage-by-stage walkthrough and [`docs/DECISION_JOURNAL.md`](docs/DECISION_JOURNAL.md)
-for every question the agent asked the founder.
+for every question the agent asked the founder. [`CLAUDE.md`](CLAUDE.md) briefs your AI assistant automatically.
 
-## Run it (no Docker, no database install)
-Requires Node 22+ and pnpm 10+.
+## Get started (no coding knowledge needed)
+
+**1. Get the code — keep the git history** (the commits *are* the lesson, so avoid "Download ZIP"):
+- **Easiest:** install [GitHub Desktop](https://desktop.github.com), then on this repo's page click **Code → Open with GitHub Desktop**.
+- **Or ask Claude Code:** *"Clone this repository into a folder: &lt;paste the repo link&gt;"*.
+
+**2. Install Node.js once:** download the **LTS** version (22 or newer) from [nodejs.org](https://nodejs.org) and click through the installer.
+
+**3. Open the folder in Claude Code and send this first message:**
+> Read this project's README, GUIDE.md and docs folder. Explain what the app does, how it's organised, and how it
+> follows the playbook. Then set it up and run it for me.
+
+Claude will install everything and start the app. Then open **http://localhost:3000** and sign in with a demo
+account below.
+
+**Prefer the browser only?** On the repo page click **Code → Codespaces → Create codespace**. GitHub installs
+everything in the cloud and opens the running app in a new tab (uses your free Codespaces hours).
+
+<details>
+<summary>Doing it by hand (for developers)</summary>
+
 ```bash
+corepack enable   # once, gives you pnpm
 pnpm install
-pnpm seed
-pnpm dev
+pnpm dev          # seeds demo data automatically, then serves http://localhost:3000
 ```
-Open http://localhost:3000. The database is embedded Postgres ([PGlite](https://pglite.dev)) stored in `.data/`.
+No Docker, no database install: the database is embedded Postgres ([PGlite](https://pglite.dev)) stored in `.data/`.
+Works on macOS, Windows and Linux.
+</details>
 
 ## Demo data
-`pnpm seed` creates two schools with fictional people. `pnpm seed:reset` wipes local data and starts over (stop
-`pnpm dev` first). **Every account's password is `campusly-demo-1`** (`DEMO_PASSWORD` in `.env.example`; local only,
+`pnpm dev` creates two schools with fictional people the first time it runs. `pnpm seed:reset` wipes local data and
+starts over (stop `pnpm dev` first). **Every account's password is `campusly-demo-1`** (`DEMO_PASSWORD` in `.env.example`; local only,
 never reuse it on a real deployment).
 
 | Email | Role | What to try |
@@ -45,7 +66,7 @@ never reuse it on a real deployment).
 - **Members:** 2 pending invites. The audit log is already full of real entries.
 
 Email is never really sent. New accounts must verify their email (D-010): open the link from the local mail sink at
-http://localhost:3000/dev/mail (enabled by `pnpm dev` via `MAIL_SINK=1`; never set that on a shared server).
+http://localhost:3000/dev/mail (switched on for `pnpm dev` by `.env.development`; never set `MAIL_SINK=1` on a shared server).
 
 ## Test it
 ```bash
@@ -67,6 +88,8 @@ Not in Phase 1 (deliberately, see [`docs/PLAN.md`](docs/PLAN.md#what-does-not-sh
 ## Docs
 | File | What |
 |---|---|
+| [`PLAYBOOK.md`](PLAYBOOK.md) | The operating manual the whole build followed |
+| [`CLAUDE.md`](CLAUDE.md) | Briefing your AI assistant reads automatically: rules, commands, how to keep the journal |
 | [`GUIDE.md`](GUIDE.md) | Student walkthrough: each playbook stage → what was done → where it is in the code |
 | [`docs/DECISION_JOURNAL.md`](docs/DECISION_JOURNAL.md) | Every question asked of the founder, options, recommendation, answer |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Locked decisions (playbook format) |

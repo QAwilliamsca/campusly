@@ -5,6 +5,7 @@ import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { sendMail } from "./mail";
 import { serverSecret } from "./secret";
+import { appUrl } from "./url";
 
 export const googleEnabled = () => !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
@@ -12,7 +13,7 @@ async function create() {
   const db = await getDb();
   return betterAuth({
     secret: serverSecret(),
-    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    baseURL: process.env.BETTER_AUTH_URL || appUrl(),
     database: drizzleAdapter(db, { provider: "pg", schema: { user: schema.user, session: schema.session, account: schema.account, verification: schema.verification } }),
     emailAndPassword: {
       enabled: true,

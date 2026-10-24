@@ -1,0 +1,4 @@
+# Same line endings on every OS (students may be on Windows).
+* text=auto eol=lf
+*.png binary
+*.ico binary

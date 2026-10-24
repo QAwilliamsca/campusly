@@ -13,12 +13,11 @@ Phase 1 is local-only, so most production sections are placeholders that name wh
 ## First run
 ```bash
 pnpm install
-pnpm seed      # demo school; dev server must be stopped
-pnpm dev       # http://localhost:3000
+pnpm dev       # seeds the demo schools on first run, then serves http://localhost:3000
 ```
 
 ## Reset local data
-Stop the dev server, then delete `.data/` and run `pnpm seed`. (Local only — never on a real database.)
+Stop the dev server, then `pnpm seed:reset`. (Local PGlite only — it refuses to run with `DATABASE_URL` set.)
 
 ## Logs
 Server console. Unexpected errors print `[error ref=xxxxxxxx]` with the stack; users see the same ref.

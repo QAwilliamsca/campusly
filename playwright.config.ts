@@ -16,7 +16,7 @@ export default defineConfig({
   use: { baseURL: URL, trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `rm -rf .data/e2e && pnpm seed && pnpm build && pnpm start -p ${PORT}`,
+    command: `pnpm seed:reset && pnpm build && pnpm start -p ${PORT}`,
     url: `${URL}/api/health`,
     timeout: 240_000,
     reuseExistingServer: false,

@@ -156,6 +156,7 @@ build, so you can see where the line sat.
 - Creating the Google OAuth app (§2.4: the agent never creates accounts). Exact steps are in RUNBOOK.md.
 - When 2FA becomes mandatory, and when email verification should be enforced (after real email exists).
 - Copying `PLAYBOOK.md` into the public repo. It's the instructor's document, so the README points to it instead.
+  *(Later decided by the founder: include it — Entry 9.)*
 
 **Mistakes Claude made and owned (§21.13).** Students should notice that the process caught all of them:
 1. Jumped to the Stage 2 decision table before the Stage 1 interview (Entry 1).
@@ -221,5 +222,27 @@ quietly drop it.
 
 **Lesson for students:** when your instruction is already precise, a good agent just does it. Questions are for
 gaps, not for things you've already said.
+
+---
+## Entry 9: Getting the repo ready for students
+
+**Founder said:** "Make sure everything required to run the repo on a student's system is included — the
+playbook, a CLAUDE.md, everything."
+
+That settled an open question from Entry 5 (whether `PLAYBOOK.md` goes in the repo): **yes**. Claude decided the
+rest itself, because it was all technical (§1.2):
+
+| Change | Why |
+|---|---|
+| `PLAYBOOK.md` copied into the repo, unchanged | Students' Claude can only follow the playbook if it can read it |
+| `CLAUDE.md` added | Claude Code reads it automatically, so every student's assistant starts with the same rules and keeps this journal going |
+| `pnpm dev` seeds demo data automatically | One command fewer for non-technical students |
+| Mail sink switched on via a committed `.env.development` instead of `MAIL_SINK=1 next dev`; `seed:reset` no longer uses `rm -rf` | Both shell tricks fail on Windows |
+| `.nvmrc`, `engines`, `packageManager`, `.gitattributes` | Same Node, pnpm and line endings on every machine |
+| Codespaces config + public-URL detection | Browser-only students can run it without installing anything |
+| README "Get started" with GitHub Desktop and a first prompt for Claude | Avoids "Download ZIP", which drops the git history the lessons rely on |
+
+**Still the founder's call:** public or private repo. On GitHub's free plan only public repos can protect `main`;
+a private repo needs GitHub Pro/Team or a fork-and-pull-request workflow.
 
 ---

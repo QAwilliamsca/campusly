@@ -19,7 +19,7 @@ Phase 1 runs locally only (Stage 11 is below the cut line). One app serves every
 | `/api/auth/*` | Better Auth |
 | `/api/files/[id]` | Signed downloads |
 | `/api/health` | Smoke check |
-| `/dev/mail` | Dry-run mail sink — **404 unless `MAIL_SINK=1`** (`pnpm dev` and the e2e server set it) |
+| `/dev/mail` | Dry-run mail sink — **404 unless `MAIL_SINK=1`** (`.env.development` sets it for `pnpm dev`; the e2e server sets it) |
 | `/forgot-password`, `/reset-password` | Password reset (sessions revoked on reset) |
 
 Environments: **local** (`.data/pglite`), **e2e** (`.data/e2e`, rebuilt every test run), **production** (set `DATABASE_URL`).
@@ -124,6 +124,10 @@ mask emails (`a***@example.com`).
   `/s/[slug]`; nav pending state uses `useLinkStatus` instead.
 - 2026-10-24 — **`sr-only` inside a scroll box** escapes it unless the box is `position: relative`; it widened the
   fees page to 669px at 375px.
+- 2026-10-24 — **Windows:** no `VAR=x cmd` or `rm -rf` in package scripts. Dev-only env goes in `.env.development`
+  (loaded by `next dev` only); file deletion goes in a Node script (`seed.ts --reset`).
+- 2026-10-24 — **Public URL** comes from `appUrl()` (`src/lib/url.ts`): `APP_URL`, else the Codespaces forwarded
+  address, else localhost. Auth and email links both use it.
 - 2026-10-24 — **Mail bodies hold tokens.** They're stored only when `MAIL_SINK=1`; otherwise redacted (red-team #5).
 - 2026-10-24 — **A form inside a list row unmounts when the row is removed** — its success message goes with it.
   Assert the row's disappearance instead.

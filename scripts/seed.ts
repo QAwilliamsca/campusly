@@ -4,11 +4,12 @@
  * Uses the real services, so audit rows exist exactly as in real use.
  * Prints counts only (PLAYBOOK §2.2). Run while the dev server is STOPPED (PGlite is single-process).
  *
- *   pnpm seed          # creates the demo schools if missing
- *   pnpm seed:reset    # wipes local data first, then seeds
+ *   pnpm seed          # creates the demo schools if missing (also runs automatically before `pnpm dev`)
+ *   pnpm seed:reset    # wipes local data first, then seeds (works on Windows too — no `rm -rf`)
  *
  * Every account and what to try with it: README.md → "Demo data".
  */
+import { rmSync } from "node:fs";
 import { eq } from "drizzle-orm";
 import { hashPassword } from "better-auth/crypto";
 import { connect, type DB } from "../src/db/connect";
@@ -202,9 +203,14 @@ async function riverside(db: DB, principal: Person) {
 }
 
 async function main() {
-  const db = await connect({ url: process.env.DATABASE_URL || undefined, dir: process.env.PGLITE_DIR || ".data/pglite" });
+  const dir = process.env.PGLITE_DIR || ".data/pglite";
+  if (process.argv.includes("--reset")) {
+    if (process.env.DATABASE_URL) throw new Error("--reset only wipes the local PGlite folder; refusing with DATABASE_URL set.");
+    for (const d of [dir, process.env.UPLOAD_DIR || ".data/uploads"]) rmSync(d, { recursive: true, force: true });
+  }
+  const db = await connect({ url: process.env.DATABASE_URL || undefined, dir });
   if ((await db.select().from(school).where(eq(school.slug, "maple-grove-school"))).length) {
-    console.log("Demo data already exists — nothing to do. Use `pnpm seed:reset` to start over.");
+    console.log("Demo data is ready (already seeded). `pnpm seed:reset` starts over.");
     return;
   }
   const maple = await mapleGrove(db);

@@ -23,4 +23,4 @@ export async function sendMail(conn: Conn, m: { to: string; subject: string; tex
 /** The /dev/mail sink. Opt-in with MAIL_SINK=1 (set by `pnpm dev` and the e2e server). Never set it on a shared server. */
 export const mailSinkEnabled = () => process.env.MAIL_SINK === "1";
 
-export const appUrl = () => process.env.APP_URL || "http://localhost:3000";
+export { appUrl } from "./url";

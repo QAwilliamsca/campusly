@@ -1,0 +1,9 @@
+{
+  "name": "Campusly",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "corepack enable && pnpm install",
+  "postAttachCommand": "pnpm dev",
+  "forwardPorts": [3000],
+  "portsAttributes": { "3000": { "label": "Campusly", "onAutoForward": "openBrowser" } },
+  "customizations": { "vscode": { "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"] } }
+}
