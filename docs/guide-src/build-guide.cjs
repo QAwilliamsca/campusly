@@ -1,6 +1,6 @@
 // Builds docs/Campusly-Live-Session-Idea-to-Live.docx — the student guided document.
-// Structure: Part 0 setup → Part 1 method → Parts 2–10 reverse-engineer each built stage with read-only
-// EXPLORE prompts → Part 11 BUILD prompts for new features → Part 12 troubleshooting → Part 13 deploy → appendices.
+// Session approach: fork the public repo → Explore (read-only) every built stage, with evidence → Build new
+// features on your own branches → see the same app live on AWS EC2 (Part 13) → appendices.
 // Run: see docs/guide-src/README.md
 const fs = require("fs");
 const {
@@ -139,24 +139,36 @@ figPart = 0; figNo = 0;
 add(
   new Paragraph({ children: [TR({ text: "AI Operator · Live Session · [Hands On] · Work along with this", bold: true, color: ACCENT, size: 18, characterSpacing: 20 })], spacing: { after: 120 } }),
   new Paragraph({ heading: HeadingLevel.TITLE, children: [TR("Idea to Live: Campusly, a School Management SaaS built with Claude Code and the Playbook")] }),
-  p("You receive a finished, tested application. First you take it apart with Claude, stage by stage, and check every claim against the code. Then you extend it with new features, using the same method that built it.", { run: { size: 24, color: MUTED }, after: 240 }),
+  p("You fork a finished, tested, live application. First you take it apart with Claude, stage by stage, and check every claim against the code. Then you extend it with new features, using the same method that built it. Finally you see how it went live on AWS.", { run: { size: 24, color: MUTED }, after: 240 }),
   label("THE PROBLEM"),
   p("Anyone can get an AI to produce a screen. Very few people can take an idea all the way to a product that stays correct, safe and deployable. The difference is not the AI: it is the method around it, and the questions asked before any code is written."),
   label("HOW THIS SESSION WORKS"),
-  p("Campusly was built with **PLAYBOOK.md**, an operating manual for an AI agent. You get the repository. For every stage that is already built, you run a **read-only Explore prompt**: Claude finds that stage in the code and shows you the evidence, and you verify it yourself. Then you run **Build prompts** to add new features. Both kinds of prompt use the same five-line formula."),
+  p("Campusly was built with **PLAYBOOK.md**, an operating manual for an AI agent. Its repository is **public**, and you work on your own fork of it. For every stage that is already built, you run a **read-only Explore prompt**: Claude finds that stage in the code and shows you the evidence, and you verify it yourself. Then you run **Build prompts** to add new features on your own branches. Both kinds of prompt use the same five-line formula. The session ends with the deployment: the same code, running on a real server."),
+  ...box("EVERYONE USES", "Repository: **https://github.com/shivavashishtha/campusly**   ·   Live app: **https://campusly.13-127-195-244.sslip.io**"),
   label("WHAT YOU WILL HAVE AT THE END"),
-  p("A working copy of Campusly on your machine; a clear picture of how each playbook stage shows up in real code; at least one new feature you added yourself, with tests; and a prompt method you can reuse on any idea."),
-  ...fig(IMG + "s01-landing.png", "Campusly, the application you receive"),
+  p("Your own fork of Campusly, running on your machine; a clear picture of how each playbook stage shows up in real code; at least one new feature you added yourself, with tests, in a pull request on your fork; an understanding of how the app reached a live server; and a prompt method you can reuse on any idea."),
+  ...fig(IMG + "s01-landing.png", "Campusly, the application you fork, explore, extend and see go live"),
+  h2("The session in four steps"),
+  ...table(
+    ["Step", "When", "What you do", "Parts"],
+    [
+      ["1 · Set up", "Before the session", "Fork the public repository, clone your fork, run the app", "0"],
+      ["2 · Explore", "In the session", "Reverse-engineer each built stage with read-only prompts and verify the evidence yourself", "1–10"],
+      ["3 · Build", "In the session, then on your own", "Add new features on your own branches, with tests, and open pull requests on your fork", "11"],
+      ["4 · Go live", "End of the session", "See how the same code was deployed to AWS EC2, and explore the deploy scripts", "13"],
+    ],
+    [1500, 1900, 4426, 1200],
+  ),
   h2("How this guide is organised"),
   ...table(
     ["Part", "What you do", "Prompt type"],
     [
-      ["0", "Get the repository running on your machine", "Orient"],
+      ["0", "Fork the public repository and run it on your machine", "Orient"],
       ["1", "Learn the method: the playbook, the prompt formula, Explore vs Build", "None"],
       ["2–10", "Reverse-engineer each stage that is already built, and verify it", "Explore (read-only)"],
       ["11", "Add new features to Campusly", "Build"],
       ["12", "Fix common problems", "None"],
-      ["13", "See how the app is deployed to AWS", "None (instructor demonstration)"],
+      ["13", "See how the app went live on AWS EC2", "Explore, then instructor demonstration"],
       ["A–D", "Appendices: rules, templates, demo accounts, decision checklist", "None"],
     ],
     [1100, 5626, 2300],
@@ -206,6 +218,8 @@ add(
   ]),
   ...fig(IMG + "s04-school-picker.png", "After signing in as the principal: two schools to choose from"),
   ...verify("You see the Maple Grove dashboard with **12 students**, **1 / 3** classes marked today and **$3,455.00** fees outstanding. If not, see Part 12."),
+  h2("0.5 Compare with the live app"),
+  p("The same code runs on the internet at **https://campusly.13-127-195-244.sslip.io**. Open it on your phone and sign in with the same account. Sign-up is closed there on purpose (it's a shared classroom demo), and the demo data is reset before each class. Your local copy is yours to change; the live one is not."),
 );
 
 // ── Part 1 · The method ───────────────────────────────────────────────────────
@@ -219,7 +233,7 @@ add(
       ["Discover", "1 Research · 2 Decide & lock", "Built: Parts 2–3"],
       ["Design the base", "3 Brand · 4 Architecture · 5 Foundations", "Built: Parts 4–6"],
       ["Build", "6 Feature slices · 7 AI layer · 8 Integrations", "6 built: Part 7 · AI comes in Part 11"],
-      ["Harden", "9 Admin · 10 Quality · 11 Deploy", "10 built: Part 8 · Deploy: Part 13"],
+      ["Harden", "9 Admin · 10 Quality · 11 Deploy", "10 built: Part 8 · 11 built (live on EC2): Part 13"],
       ["Sell & scale", "12 Marketing · 13 Customers · 14 Scale", "Not in this course"],
     ],
     [1900, 4126, 3000],
@@ -246,7 +260,7 @@ add(
   p("If you can't write the Proof line, you are not ready to send the prompt."),
   h2("1.4 Two kinds of prompt"),
   ...table(
-    ["", "Explore prompt (Parts 0, 2–10)", "Build prompt (Part 11)"],
+    ["", "Explore prompt (Parts 0, 2–10, 13)", "Build prompt (Part 11)"],
     [
       ["Purpose", "Understand what is already built", "Add something new"],
       ["Changes files?", "**Never.** Always says \"Do not change any files\"", "Yes, on a separate branch"],
@@ -372,12 +386,13 @@ add(
     ["Next.js 16, React 19, TypeScript, Drizzle, Better Auth, Zod, Tailwind", "package.json"],
     ["An embedded database (PGlite): real Postgres running inside Node, stored in .data/", "src/db/connect.ts"],
     ["A lint rule that blocks direct database access outside src/db", "eslint.config.mjs"],
-    ["Every change on GitHub runs: typecheck → lint → tests → browser tests → audit → secret scan", ".github/workflows/ci.yml"],
+    ["Every change on GitHub runs: typecheck → lint → tests → browser tests → audit → secret scan, and the latest run is green", ".github/workflows/ci.yml; the repository's **Actions** tab"],
     ["Every setting listed, none filled in", ".env.example"],
     ["Stand-ins: email goes to a local mail log; files to a local folder; no payment gateway", "src/lib/mail.ts, src/lib/files.ts"],
   ]),
   ...fig(IMG + "s20-mail-sink.png", "http://localhost:3000/dev/mail: emails are never really sent; they appear here"),
-  ...verify("Run `pnpm typecheck` then `pnpm lint`. Both finish **with no errors**."),
+  ...verify("Run `pnpm typecheck` then `pnpm lint`. Both finish **with no errors**. Then open the **Actions** tab of https://github.com/shivavashishtha/campusly: the latest run has a green tick."),
+  ...box("A REAL CI FAILURE FROM THIS BUILD", "For the first few pushes, every CI run failed in its first step and **no checks ran at all**: the pnpm version was written in two places (the workflow file and package.json), and the setup step refused to guess. The fix was deleting one line. Lesson: a red cross that nobody reads protects nothing. Check the Actions tab after you push.", WARN, WARN_INK),
   ...decide("Which technology stack?", "The most boring, popular option that runs on everyone's machine without extra installs. AI writes popular tools best.", "If everyone already has Docker, a separate Postgres database is fine. If a client requires a stack, keep the playbook; only the commands change."),
 );
 
@@ -517,11 +532,12 @@ add(
   h2("10.3 What Claude should show you"),
   ...checklist([
     ["The playbook and the AI briefing file", "PLAYBOOK.md, CLAUDE.md"],
-    ["Decisions, plan, decision journal, engineering guide, runbook, incident rules, notes", "docs/"],
-    ["One commit per stage, oldest first, starting with \"Stage 1–2: research, decision journal…\"", "git log"],
+    ["Decisions, plan, decision journal, engineering guide, runbook, incident rules, notes, deployment guide", "docs/ (DEPLOY_AWS.md for the deployment)"],
+    ["The server scripts", "deploy/"],
+    ["One commit per stage, oldest first, starting with \"Stage 1–2: research, decision journal…\", then the deployment commits", "git log"],
     ["The next step for the project", "docs/NOTES.md (top)"],
   ]),
-  ...verify("Run `git log --oneline --reverse`. The first commit is *Stage 1–2: research, decision journal, locked decisions, phase-1 plan*."),
+  ...verify("Run `git log --oneline --reverse`. The first commit is *Stage 1–2: research, decision journal, locked decisions, phase-1 plan*. Your fork has exactly the same history as the original; GitHub shows *This branch is up to date with shivavashishtha/campusly:main*."),
   ...decide("Should the repository be public or private?", "Public if nothing in it is secret and you want free protection of the main branch. Private if the code is commercial.", "Campusly chose **public** (decision D-018): students fork it with no invitations, and the server downloads it with no token. Before going public, the whole history was checked for secrets; a file deleted later still sits in old commits."),
 );
 
@@ -529,7 +545,7 @@ add(
 figPart = 11; figNo = 0;
 add(
   part("Part 11 · Build new features"),
-  p("Now you change the code. Every Build prompt follows the same five lines, and names the rules from Parts 2–8 that the new feature must respect."),
+  p("Now you change the code, in **your fork**. Every Build prompt follows the same five lines, and names the rules from Parts 2–8 that the new feature must respect. Your changes never touch the instructor's repository or the live app."),
   h2("11.1 Before every feature"),
   ...steps([
     "Make sure the app's tests pass: `pnpm test`.",
@@ -571,7 +587,7 @@ const features = [
 for (const [id, title, goal, rules, constraints, proof] of features) {
   add(
     h2(`${id} ${title}`),
-    ...promptBox("BUILD", id, title, { Context: "Campusly repository on a new feature branch; CLAUDE.md and the module pattern in docs/ENGINEERING_GUIDE.md apply.", Goal: goal, Rules: rules, Constraints: constraints, Proof: proof }),
+    ...promptBox("BUILD", id, title, { Context: "My fork of the Campusly repository, on a new feature branch; CLAUDE.md and the module pattern in docs/ENGINEERING_GUIDE.md apply.", Goal: goal, Rules: rules, Constraints: constraints, Proof: proof }),
   );
 }
 add(...box("WHEN THE INSTRUCTOR DEMONSTRATES 11.3", "Watch for three things: Claude reads CLAUDE.md before planning; the plan lists the new tests **before** the code; and the finished feature adds rows to the authorization matrix. Those three habits are what you repeat in 11.4 to 11.10."));
@@ -590,6 +606,7 @@ add(
       ["A Build prompt's plan changes something users see that you didn't decide", "The prompt left a decision open", "Stop. Decide it yourself, or ask Claude for options and a recommendation"],
       ["Tests fail after your feature", "The new code broke an existing rule", "Ask Claude to explain the failing test before changing anything; never weaken a test to make it pass"],
       ["Push fails with *Permission denied* or *403*", "You cloned the instructor's repository instead of your fork", "Fork it (Part 0.2), then ask Claude: *point origin at my fork, github.com/<your-username>/campusly, and push again*"],
+      ["On the live app, *Create an account* says sign-ups are closed", "The live app is a shared classroom demo (decision D-015)", "Sign in with a demo account; to try sign-up, use your local copy (emails appear at localhost:3000/dev/mail)"],
       ["You changed something by accident", "", "Ask Claude: *show me git status, then restore the files I didn't mean to change*"],
     ],
     [3000, 3013, 3013],
@@ -598,8 +615,25 @@ add(
 
 // ── Part 13 · Deploy (instructor demonstration) ───────────────────────────────
 add(
-  partHead(13, "Deploy to AWS EC2 (instructor demonstration)", "You don't need an AWS account for this course. This part shows how the instructor put Campusly on an AWS EC2 server, with Claude doing the clicking through the Claude in Chrome extension. The result is live at https://campusly.13-127-195-244.sslip.io."),
-  h2("13.1 Decisions"),
+  partHead(13, "Go live: deploy to AWS EC2", "Playbook Stage 11. You don't need an AWS account for this course. First you explore the deploy scripts in the repository, exactly as in Parts 2–10. Then the instructor shows how Campusly was put on an AWS EC2 server, with Claude doing the clicking through the Claude in Chrome extension. The result is live at https://campusly.13-127-195-244.sslip.io."),
+  h2("13.1 Explore prompt"),
+  ...promptBox("EXPLORE", "13.1", "Explain how the server sets itself up", {
+    Context: "My fork of the Campusly repository; I am studying Stage 11 (Deploy).",
+    Goal: "Explain, in order, what happens from the moment the EC2 server first boots until the site answers: which file runs first, what each script in deploy/ does, where the secret comes from, how the web address and HTTPS are set up, and how the site is updated later. Then list the deploy decisions and the mistakes recorded along the way.",
+    Rules: "Only what the repository says; name the file for each step. PLAYBOOK §2.4 (the agent never handles accounts or secrets).",
+    Constraints: "Do not change any files. Do not try to connect to any server.",
+    Proof: "Your steps match docs/DEPLOY_AWS.md, and you name the line that makes the app run in demo mode.",
+  }),
+  ...checklist([
+    ["User data runs once on first boot: downloads the public repository, then runs the installer", "deploy/ec2-user-data.sh"],
+    ["The installer: swap memory, Node.js 22, Caddy, an app user, a secret generated **on the server**, seed, build, start", "deploy/install.sh"],
+    ["Every boot: the address campusly.<ip-with-dashes>.sslip.io, the settings file (including DEMO_MODE=1) and HTTPS", "deploy/configure.sh"],
+    ["The app restarts by itself if it crashes", "deploy/campusly.service"],
+    ["Updating and resetting the live app: sudo campusly-update, sudo campusly-reset-demo", "deploy/update.sh, deploy/reset-demo.sh"],
+    ["The decisions: demo mode, EC2, public repository; the Lightsail attempt superseded", "docs/DECISIONS.md D-015 to D-018, docs/DECISION_JOURNAL.md Entry 10"],
+  ]),
+  ...verify("Open **https://campusly.13-127-195-244.sslip.io**: the address bar shows a padlock. Sign in as **teacher@example.com**: you see Grade 5-A, the same as on your machine."),
+  h2("13.2 Decisions"),
   ...table(
     ["Decision", "Choice", "Why"],
     [
@@ -612,7 +646,7 @@ add(
     ],
     [2300, 3226, 3500],
   ),
-  h2("13.2 Who does what"),
+  h2("13.3 Who does what"),
   p("The playbook never lets an AI create accounts, enter card details, type passwords or handle secret keys. So the work is split:"),
   ...table(
     ["Claude (through the browser extension)", "The person"],
@@ -625,10 +659,10 @@ add(
     ],
     [4513, 4513],
   ),
-  h2("13.3 Budget alarm first"),
+  h2("13.4 Budget alarm first"),
   ...steps(["Billing and Cost Management → **Budgets** → Create budget → **Monthly cost budget**, $25, your email → Create."]),
   ...fig(DEP + "03-budget-monthly-25.jpg", "The budget alarm, set before anything costs money", 5.6),
-  h2("13.4 Create a read-only GitHub token (when the repository is private)"),
+  h2("13.5 Create a read-only GitHub token (when the repository is private)"),
   p("Campusly's repository is public, so its server needs no token. **If your repository is private, the server cannot download it without one, and this step decides whether your deploy works.** On the first attempt the token was left empty, the download failed with *could not read Username for 'https://github.com'*, and the site never came up."),
   ...steps([
     "GitHub → your photo (top right) → **Settings** → **Developer settings** (bottom of the left menu).",
@@ -639,8 +673,8 @@ add(
     "GitHub asks for your password. Then click **Generate token** and copy it straight away: it is shown only once.",
   ]),
   ...fig(DEP + "08-github-token-readonly.jpg", "A token that can only read this one repository", 5.6),
-  ...box("KEEP THE TOKEN SECRET", "Paste it **only** into the GITHUB_TOKEN=\"\" line of the server's user data (13.5, step 7), or into a terminal prompt that hides what you type. **Never** into a chat (including with Claude), a document, a screenshot or a commit. A token typed into a chat is a leaked token: delete it on GitHub and make a new one. Don't use a \"classic\" token (it starts with ghp_): it can read every repository you own.", WARN, WARN_INK),
-  h2("13.5 Launch the server"),
+  ...box("KEEP THE TOKEN SECRET", "Paste it **only** into the GITHUB_TOKEN=\"\" line of the server's user data (13.6, step 7), or into a terminal prompt that hides what you type. **Never** into a chat (including with Claude), a document, a screenshot or a commit. A token typed into a chat is a leaked token: delete it on GitHub and make a new one. Don't use a \"classic\" token (it starts with ghp_): it can read every repository you own.", WARN, WARN_INK),
+  h2("13.6 Launch the server"),
   p("**EC2 → Instances → Launch instances**, then from top to bottom:"),
   ...steps([
     "**Name:** campusly.",
@@ -649,7 +683,7 @@ add(
     "**Key pair:** **Proceed without a key pair**. We use the browser terminal instead, so there is no key file to lose.",
     "**Network settings:** create a security group and tick **Allow SSH**, **Allow HTTPS** and **Allow HTTP** traffic from the internet.",
     "**Configure storage:** **20 GiB**.",
-    "**Advanced details → User data:** paste the whole of deploy/ec2-user-data.sh from the repository. Public repository: leave GITHUB_TOKEN=\"\" empty. Private: put your token from 13.4 between the quotes.",
+    "**Advanced details → User data:** paste the whole of deploy/ec2-user-data.sh from the repository. Public repository: leave GITHUB_TOKEN=\"\" empty. Private: put your token from 13.5 between the quotes.",
     "Re-read the **Summary** on the right: Ubuntu 24.04, t3.small, 20 GiB. Then the person clicks **Launch instance**.",
   ]),
   ...fig(DEP + "10-ec2-ubuntu-2404-not-pro.jpg", "Step 2: choose Ubuntu Server 24.04 LTS, not 26.04 and not Pro", 5.6),
@@ -658,14 +692,14 @@ add(
   ...fig(DEP + "11-ec2-summary-t3small.jpg", "Step 8: the Summary to re-read before Launch", 5.6),
   ...fig(DEP + "14-ec2-launched.jpg", "The launch succeeded", 5.6),
   ...box("A MISTAKE WORTH REMEMBERING", "While Claude was clicking, the page shifted and the wrong instance type and Ubuntu Pro got selected. Later, a \"Confirm changes\" dialog appeared exactly over the wizard's **Cancel** button, and one click threw the whole form away. Nothing was launched by mistake, because the Summary was re-read every time. Whether a person or an AI is clicking: **one click, look, then the next click, and re-read the summary before any button that costs money.**", WARN, WARN_INK),
-  h2("13.6 A fixed IP address"),
+  h2("13.7 A fixed IP address"),
   ...steps([
     "**EC2 → Elastic IPs → Allocate Elastic IP address → Allocate.**",
     "**Actions → Associate Elastic IP address** → Instance: campusly → **Associate**.",
     "The web address is the IP with dots turned into dashes: **campusly.13-127-195-244.sslip.io**.",
   ]),
   ...fig(DEP + "15-elastic-ip-associated.jpg", "The Elastic IP 13.127.195.244, attached to the server", 5.6),
-  h2("13.7 Go live"),
+  h2("13.8 Go live"),
   ...steps([
     "Wait about 10 minutes while the server installs Node.js and Caddy, seeds the demo schools and builds the app.",
     "To watch: instance → **Connect → EC2 Instance Connect → Connect**, then type **sudo tail -n 20 /var/log/campusly-install.log**. It is done when the last line is **CAMPUSLY READY**.",
@@ -673,7 +707,7 @@ add(
   ]),
   ...fig(DEP + "16-live-site.jpg", "Campusly live on EC2, with automatic HTTPS", 5.8),
   ...verify("The address opens with a padlock (HTTPS), and **principal@example.com** / **campusly-demo-1** signs in."),
-  h2("13.8 Updating the live site"),
+  h2("13.9 Updating the live site"),
   p("After pushing changes to GitHub: instance → Connect → EC2 Instance Connect, then type **sudo campusly-update**. It pulls the code, rebuilds and restarts in 2–3 minutes and keeps the data. **sudo campusly-reset-demo** restores the demo data."),
   p("The full click-by-click record is in docs/DEPLOY_AWS.md."),
 );
@@ -706,7 +740,7 @@ add(
   label("BUILD (changes code)"),
   ...table(["Line", "Your prompt"], [["Context", "___ repository on a new branch; CLAUDE.md applies."], ["Goal", " "], ["Rules", "Which must-never rules and permission rules apply?"], ["Constraints", "What must not change? What is out of scope?"], ["Proof", "What will I check in the app, and which test proves it?"], ["", "**Plan first.**"]], [1800, 7226]),
   h2("Appendix C · Demo accounts"),
-  p("Every password is **campusly-demo-1**. All people are fictional."),
+  p("Every password is **campusly-demo-1**. All people are fictional. They work on your local copy (http://localhost:3000) and on the live app (https://campusly.13-127-195-244.sslip.io)."),
   ...table(
     ["Account", "Role", "What to look at"],
     [
@@ -736,8 +770,8 @@ add(
       ["First feature", "What does everything depend on?", "Here: students and classes"],
       ["Tests", "What breaks the buyer's trust?", "One test per must-never line, then the full journey"],
       ["Demo data", "Which situations will real users meet?", "Every status, plus the empty ones"],
-      ["Repository", "Public or private?", "Secrets? Branch protection on your plan?"],
-      ["Host", "Cheapest server that can build the app?", "Enough memory for the build; cheaper means the credit lasts longer"],
+      ["Repository", "Public or private?", "No secrets in any commit → public is simplest (students fork, the server needs no token)"],
+      ["Host", "Cheapest server that can build the app?", "Enough memory for the build (Campusly: EC2 t3.small, 2 GiB); cheaper means the credit lasts longer"],
     ],
     [1700, 3500, 3826],
   ),
