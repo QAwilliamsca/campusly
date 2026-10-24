@@ -1,6 +1,7 @@
 import { AuthForm } from "@/components/AuthForm";
 import { googleEnabled } from "@/lib/auth";
 import { safeNext } from "@/lib/session";
+import { mailSinkEnabled } from "@/lib/mail";
 
 export const metadata = { title: "Sign in" };
 
@@ -8,7 +9,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<{
   const { next } = await searchParams;
   return (
     <main className="grid min-h-dvh place-items-center px-4">
-      <AuthForm mode="sign-in" next={safeNext(next)} google={googleEnabled()} />
+      <AuthForm mode="sign-in" next={safeNext(next)} google={googleEnabled()} sinkHint={mailSinkEnabled()} />
     </main>
   );
 }

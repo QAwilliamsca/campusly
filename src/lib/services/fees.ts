@@ -17,21 +17,24 @@ const PaymentInput = z
   .object({ invoiceId: id, amount, method: z.enum(["cash", "bank", "card", "other"]), paidOn: isoDate.optional(), idempotencyKey: z.string().min(1).max(100) })
   .strict();
 
-function minor(ctx: Ctx, value: string) {
+const MAX_MINOR = 2_147_483_647; // amount_minor is a 32-bit integer column
+
+function minor(currency: string, value: string) {
   let m: number;
   try {
-    m = toMinor(value, ctx.school.currency);
+    m = toMinor(value, currency);
   } catch (e) {
     throw new AppError("invalid", `amount: ${(e as Error).message}`);
   }
   if (m <= 0) throw new AppError("invalid", "amount: Must be more than zero");
+  if (m > MAX_MINOR) throw new AppError("invalid", "amount: Too large");
   return m;
 }
 
 export async function createInvoice(ctx: Ctx, input: unknown) {
   assertCan(ctx.member, "fee.manage");
   const data = parse(InvoiceInput, input);
-  const amountMinor = minor(ctx, data.amount);
+  const amountMinor = minor(ctx.school.currency, data.amount);
   if (!(await ctx.s.findOne(student, eq(student.id, data.studentId)))) throw notFound("Student");
   return ctx.s.transaction(async (s) => {
     const code = await nextCode(s, "invoice", "INV");
@@ -45,7 +48,7 @@ export async function createInvoice(ctx: Ctx, input: unknown) {
 export async function billClass(ctx: Ctx, input: unknown) {
   assertCan(ctx.member, "fee.manage");
   const data = parse(BillInput, input);
-  const amountMinor = minor(ctx, data.amount);
+  const amountMinor = minor(ctx.school.currency, data.amount);
   const cls = await ctx.s.findOne(schoolClass, eq(schoolClass.id, data.classId));
   if (!cls) throw notFound("Class");
   const students = await ctx.s.findMany(student, eq(student.classId, cls.id), { orderBy: [student.code] });
@@ -67,13 +70,14 @@ export async function billClass(ctx: Ctx, input: unknown) {
 export async function recordPayment(ctx: Ctx, input: unknown) {
   assertCan(ctx.member, "fee.manage");
   const data = parse(PaymentInput, input);
-  const amountMinor = minor(ctx, data.amount);
   try {
     return await ctx.s.transaction(async (s) => {
       const inv = await s.lockOne(invoice, eq(invoice.id, data.invoiceId));
       if (!inv) throw notFound("Invoice");
       const dup = await s.findOne(payment, eq(payment.idempotencyKey, data.idempotencyKey));
-      if (dup) return dup;
+      if (dup?.invoiceId === inv.id) return dup; // same click arriving twice
+      if (dup) throw new AppError("conflict", "This payment key was already used for another invoice.");
+      const amountMinor = minor(inv.currency, data.amount); // the invoice's currency, not today's setting
       const paid = (await s.findMany(payment, eq(payment.invoiceId, inv.id))).reduce((a, p) => a + p.amountMinor, 0);
       if (paid + amountMinor > inv.amountMinor) throw new AppError("invalid", "That is more than the balance due.");
       const [row] = await s

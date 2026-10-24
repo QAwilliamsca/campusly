@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { SCHOOL, expectNoOverflow, signIn, watchConsole } from "./helpers";
+import { SCHOOL, expectNoOverflow, signIn, signUp, watchConsole } from "./helpers";
 
 // Seeded demo school: Daniel teaches Grade 5-A (6 students); Maria is Leo's parent; Leo is a student.
 
@@ -48,11 +48,6 @@ test("parent sees only their own child; a real sibling's URL is not found (no ID
 });
 
 test("a user from another school gets 404 for this school", async ({ page }) => {
-  await page.goto("/sign-up");
-  await page.getByLabel("Full name").fill("Outsider Person");
-  await page.getByLabel("Email").fill(`outsider-${Date.now()}@example.com`);
-  await page.getByLabel("Password").fill("campusly-demo-1");
-  await page.getByRole("button", { name: "Create account" }).click();
-  await page.waitForURL("**/schools");
+  await signUp(page, "Outsider Person", `outsider-${Date.now()}@example.com`);
   expect((await page.goto(SCHOOL))?.status()).toBe(404);
 });

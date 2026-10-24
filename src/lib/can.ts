@@ -5,6 +5,8 @@ export type Member = { id: string; userId: string; role: Role; schoolId: string 
 export type Action =
   | "school.settings"
   | "member.invite"
+  | "member.invite_admin"
+  | "member.remove_staff"
   | "class.manage"
   | "student.manage"
   | "student.view"
@@ -28,6 +30,8 @@ const VIEW_OWN = { ...STAFF, teacher: "own", parent: "own", student: "own" } as 
 const GRANTS: Record<Action, Partial<Record<Role, Grant>>> = {
   "school.settings": STAFF,
   "member.invite": STAFF,
+  "member.invite_admin": { owner: "all" },
+  "member.remove_staff": { owner: "all" },
   "class.manage": STAFF,
   "student.manage": STAFF,
   "document.manage": STAFF,

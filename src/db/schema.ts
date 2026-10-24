@@ -58,6 +58,7 @@ export const plan = pgTable("plan", {
   name: text("name").notNull(),
   limitKind: text("limit_kind", { enum: ["students"] }).notNull(),
   limitValue: integer("limit_value").notNull(),
+  storageMb: integer("storage_mb").notNull().default(500), // document storage per school (D-012)
 });
 
 // ── The workspace (tenant) ───────────────────────────────────────────────────

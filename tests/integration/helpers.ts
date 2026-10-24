@@ -9,9 +9,10 @@ let n = 0;
 /** Fresh in-memory Postgres per test file — real SQL, no mocks. */
 export const testDb = (): Promise<DB> => connect();
 
-export async function makeUser(db: DB, label = "user") {
+/** A user who has verified their email (D-010). Pass verified:false for the unverified case. */
+export async function makeUser(db: DB, label = "user", opts: { verified?: boolean } = {}) {
   n += 1;
-  const row = { id: crypto.randomUUID(), name: `${label} ${n}`, email: `${label}${n}@example.com` };
+  const row = { id: crypto.randomUUID(), name: `${label} ${n}`, email: `${label}${n}@example.com`, emailVerified: opts.verified ?? true };
   await db.insert(user).values(row);
   return row;
 }

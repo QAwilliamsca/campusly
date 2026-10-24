@@ -1,5 +1,5 @@
 import { eq, inArray, sql } from "drizzle-orm";
-import { plan, school, user } from "./schema";
+import { document, plan, school, user } from "./schema";
 import type { Scoped } from "./scoped";
 
 // Reads of global (non-tenant) tables needed by feature code. Kept here, inside db/,
@@ -19,4 +19,9 @@ export async function usersByIds(s: Scoped, ids: string[]) {
 export async function planOf(s: Scoped) {
   const [row] = await s._conn.select({ plan }).from(school).innerJoin(plan, eq(plan.id, school.planId)).where(eq(school.id, s.schoolId));
   return row!.plan;
+}
+
+export async function storageUsedBytes(s: Scoped): Promise<number> {
+  const [row] = await s._conn.select({ n: sql<string>`coalesce(sum(${document.size}), 0)` }).from(document).where(eq(document.schoolId, s.schoolId));
+  return Number(row?.n ?? 0);
 }

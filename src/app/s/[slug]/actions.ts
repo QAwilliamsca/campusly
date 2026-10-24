@@ -5,7 +5,7 @@ import { requireCtx } from "@/lib/session";
 import { run } from "@/lib/run";
 import type { Result } from "@/lib/result";
 import { updateSettings } from "@/lib/services/schools";
-import { inviteMember, revokeInvite } from "@/lib/services/members";
+import { inviteMember, removeMember, revokeInvite } from "@/lib/services/members";
 import { assignTeacher, createClass } from "@/lib/services/classes";
 import { admitStudent, updateStudent } from "@/lib/services/students";
 import { uploadDocument } from "@/lib/services/documents";
@@ -49,6 +49,12 @@ export const revokeInviteAction = async (_: Result, fd: FormData) =>
   act(fd, async (ctx) => {
     await revokeInvite(ctx, String(fd.get("inviteId")));
     return "Invite revoked.";
+  });
+
+export const removeMemberAction = async (_: Result, fd: FormData) =>
+  act(fd, async (ctx) => {
+    await removeMember(ctx, String(fd.get("membershipId")));
+    return "Member removed.";
   });
 
 export const createClassAction = async (_: Result, fd: FormData) =>

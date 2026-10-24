@@ -14,8 +14,13 @@ export const maskEmail = (e: string) => {
  */
 export async function sendMail(conn: Conn, m: { to: string; subject: string; text: string; template: string }) {
   const toMasked = maskEmail(m.to);
-  await conn.insert(mailLog).values({ toMasked, subject: m.subject, template: m.template, body: m.text, status: "dry-run" });
+  // Bodies hold invite/reset links. Keep them only when the local sink is explicitly on.
+  const body = mailSinkEnabled() ? m.text : "[redacted — MAIL_SINK is off]";
+  await conn.insert(mailLog).values({ toMasked, subject: m.subject, template: m.template, body, status: "dry-run" });
   console.info(`[mail:dry-run] ${m.template} → ${toMasked}`);
 }
+
+/** The /dev/mail sink. Opt-in with MAIL_SINK=1 (set by `pnpm dev` and the e2e server). Never set it on a shared server. */
+export const mailSinkEnabled = () => process.env.MAIL_SINK === "1";
 
 export const appUrl = () => process.env.APP_URL || "http://localhost:3000";

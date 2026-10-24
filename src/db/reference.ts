@@ -6,8 +6,8 @@ export async function seedReference(db: DB) {
   await db
     .insert(plan)
     .values([
-      { id: "trial", name: "Trial", limitKind: "students", limitValue: 50 },
-      { id: "standard", name: "Standard", limitKind: "students", limitValue: 1000 },
+      { id: "trial", name: "Trial", limitKind: "students", limitValue: 50, storageMb: 500 },
+      { id: "standard", name: "Standard", limitKind: "students", limitValue: 1000, storageMb: 500 },
     ])
     .onConflictDoNothing();
 }

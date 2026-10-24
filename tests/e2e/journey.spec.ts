@@ -135,9 +135,20 @@ test("an invite link can't be reused", async ({ browser }) => {
   await expect(second.locator("form [role=alert]")).toContainText("invalid, expired, or meant for a different email");
 });
 
+test("owner removes a member and their access ends immediately (D-011)", async ({ browser }) => {
+  const link = await inviteLink(owner, email("leaver"), "teacher");
+  const leaver = await (await browser.newContext()).newPage();
+  await acceptAs(leaver, "Leaving Teacher", email("leaver"), link);
+  await owner.goto(`/s/${slug}/members`);
+  await owner.getByRole("button", { name: "Remove Leaving Teacher" }).click();
+  // The row (and its form) disappears — that is the confirmation.
+  await expect(owner.getByRole("row", { name: /Leaving Teacher/ })).toHaveCount(0);
+  expect((await leaver.goto(`/s/${slug}`))?.status()).toBe(404);
+});
+
 test("every change is in the audit log", async () => {
   await owner.goto(`/s/${slug}/audit`);
-  for (const action of ["school.create", "class.create", "student.admit", "member.join", "attendance.mark", "marks.enter", "invoice.bill_class", "payment.record"]) {
+  for (const action of ["school.create", "class.create", "student.admit", "member.join", "attendance.mark", "marks.enter", "invoice.bill_class", "payment.record", "member.remove"]) {
     await expect(owner.getByRole("cell", { name: action, exact: true }).first()).toBeVisible();
   }
 });

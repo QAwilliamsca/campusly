@@ -28,6 +28,8 @@ export default defineConfig({
       BETTER_AUTH_SECRET: "e2e-only-secret-not-used-anywhere-else-0123456789",
       // The suite signs in many times from one IP; production keeps the 5/min default.
       AUTH_RATE_LIMIT: "1000",
+      // Sign-up needs a verified email (D-010); the suite reads links from the local mail sink.
+      MAIL_SINK: "1",
     },
   },
 });

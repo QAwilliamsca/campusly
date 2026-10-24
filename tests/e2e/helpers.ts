@@ -19,12 +19,19 @@ export async function signIn(page: Page, email: string, password = DEMO_PASSWORD
   await page.waitForURL("**/schools");
 }
 
+/** Sign up, then verify the email by opening the link from the local mail sink (D-010). */
 export async function signUp(page: Page, name: string, email: string, next?: string) {
   await page.goto(next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up");
   await page.getByLabel("Full name").fill(name);
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(DEMO_PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+  await page.goto("/dev/mail");
+  const masked = `${email[0]}***@${email.split("@")[1]}`;
+  const mail = page.locator("li", { hasText: `verify-email · to ${masked}` }).first();
+  const body = await mail.locator("pre").textContent();
+  await page.goto(body!.match(/https?:\/\/\S+/)![0]);
   await page.waitForURL(next ? `**${next}` : "**/schools");
 }
 

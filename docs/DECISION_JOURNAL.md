@@ -132,3 +132,53 @@ unit) and design so the flip costs copy, not code."
 - AI stance: no AI feature in Phase 1 (Stage 7 is below the cut line, per 3.2).
 
 ---
+## Entry 5: During the build — what Claude decided WITHOUT asking (and why)
+
+The playbook splits decisions in two (§1.1 vs §1.2): anything **a customer could notice** goes to the founder;
+anything **purely technical** the agent decides and writes down. Students often get this wrong both ways, either
+asking the AI to decide product questions or micromanaging technical ones. Here is the second list from this
+build, so you can see where the line sat.
+
+| Decision | Why Claude didn't ask | Where it's written |
+|---|---|---|
+| Path-based tenancy (`/s/<school>/…`) instead of subdomains | Invisible to schools in phase 1; subdomains need DNS (Stage 3/11, cut) | ENGINEERING_GUIDE §2 |
+| Human codes via an atomic counter row instead of "max+1 under an advisory lock" | Same guarantee, simpler SQL; a technical equivalent of the playbook rule | ENGINEERING_GUIDE §7 |
+| No background queue, notifications or feature flags yet | No phase-1 feature needs them; named below the cut line, not dropped (§2.7) | PLAN.md cut line |
+| Dry-run mail sink page at `/dev/mail` | Lets local users open invite links; 404 in production builds (tested) | RUNBOOK |
+| Email verification sent but not enforced | Mail can't really be delivered in phase 1; enforcing would lock everyone out | Cut line note below |
+| Pinned TypeScript 6 instead of 7 | The linter doesn't support 7 yet; boring and working beats new (§9) | ENGINEERING_GUIDE gotchas |
+| Removed `loading.tsx` from school pages | It made forbidden pages return HTTP 200; correct 404s matter more | INCIDENT_RULES INC-002 |
+| Accepted one moderate dependency advisory | Checked reachability first (§21.17): esbuild's dev server is never run | NOTES.md |
+| Git author set to "Instructor &lt;your email&gt;" | The machine had no git identity; commits are required by the playbook | NOTES.md |
+
+**Things Claude flagged but did not decide**, because they belong to the founder and stay open:
+- Domain and trademark check for "Campusly".
+- Creating the Google OAuth app (§2.4: the agent never creates accounts). Exact steps are in RUNBOOK.md.
+- When 2FA becomes mandatory, and when email verification should be enforced (after real email exists).
+- Copying `PLAYBOOK.md` into the public repo. It's the instructor's document, so the README points to it instead.
+
+**Mistakes Claude made and owned (§21.13).** Students should notice that the process caught all of them:
+1. Jumped to the Stage 2 decision table before the Stage 1 interview (Entry 1).
+2. Two browser tests had wrong expectations (they counted 3 students where the form had admitted 2 into the
+   class). Fixed the **test**, said so in the commit message, never weakened the app.
+3. Made the idempotency-key rule stricter than needed (minimum 8 characters), which broke three fee tests. The
+   rule was relaxed (the form sends UUIDs); the tests were left unchanged.
+
+---
+## Entry 6: Red-team findings that needed the founder (Stage 10, playbook §15.3)
+
+A separate reviewer agent was asked to "list every way to abuse this app, don't fix". It returned 13 findings
+(2 high, 5 medium, 6 low) and confirmed the tenancy wall, XSS escaping and slug handling were clean. Claude sorted
+them using the §1.1/§1.2 boundary: **10 were technical and fixed without asking**, and **3 changed what users
+experience or what roles can do**, so they went to the founder.
+
+| # | Finding | Options offered | Claude recommended (+ reason) | Founder chose |
+|---|---|---|---|---|
+| 6.1 | HIGH: anyone holding an invite link could sign up as the invited email without proving they own it, then join (even as admin) | Require verified email · Hide links from staff · Accept risk | **Require verified email**: closes it fully; locally the link shows in the mail sink | **Require verified email** |
+| 6.2 | HIGH: admins could invite more admins; nobody could be removed | Owner-only admins + removal · Owner-only admins · Keep | **Owner-only admins + removal**: a fired admin must lose access | **Owner-only admins + removal** |
+| 6.3 | MEDIUM: unlimited schools per account (each with a fresh trial quota) and unlimited uploads | 3 schools/user + 500 MB/school · 1 school/user · Decide later | **3 + 500 MB**: generous, stops quota farming | **3 schools/user, 500 MB/school** |
+
+**Lesson for students:** the reviewer *found* problems; it didn't decide policy. "Can an admin create admins?"
+sounds technical, but it's a question about who the customer trusts, so the founder answers it.
+
+---

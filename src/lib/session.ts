@@ -9,9 +9,7 @@ export async function currentUser(): Promise<SessionUser | null> {
   return session ? { id: session.user.id, email: session.user.email, name: session.user.name } : null;
 }
 
-/** Only same-site relative paths — blocks open redirects (PLAYBOOK §20.3). */
-export const safeNext = (next: unknown, fallback = "/schools") =>
-  typeof next === "string" && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : fallback;
+export { safeNext } from "./redirect";
 
 export async function requireUser(next = "/schools") {
   const user = await currentUser();

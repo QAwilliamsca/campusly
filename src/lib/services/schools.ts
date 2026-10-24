@@ -1,12 +1,14 @@
-import { eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "@/db/connect";
-import { membership, school } from "@/db/schema";
+import { invoice, membership, school } from "@/db/schema";
 import { scoped } from "@/db/scoped";
 import { audit } from "@/db/audit";
 import type { Ctx, SessionUser } from "../context";
 import { AppError, assertCan, isUniqueViolation, parse } from "../errors";
 import { currency, text, timezone } from "../validation";
+
+export const MAX_OWNED_SCHOOLS = 3; // D-012
 
 const SchoolInput = z.object({ name: text(120), currency, timezone }).strict();
 
@@ -21,6 +23,8 @@ const slugify = (name: string) =>
 /** S-01: create a school; the creator becomes its owner. */
 export async function createSchool(db: DB, user: SessionUser, input: unknown) {
   const data = parse(SchoolInput, input);
+  const [owned] = await db.select({ n: count() }).from(membership).where(and(eq(membership.userId, user.id), eq(membership.role, "owner")));
+  if (Number(owned?.n) >= MAX_OWNED_SCHOOLS) throw new AppError("limit", `You can own up to ${MAX_OWNED_SCHOOLS} schools. Contact us to raise the limit.`);
   const base = slugify(data.name);
   for (let attempt = 0; attempt < 5; attempt++) {
     const slug = attempt ? `${base}-${crypto.randomUUID().slice(0, 4)}` : base;
@@ -50,6 +54,10 @@ export async function listMySchools(db: DB, userId: string) {
 export async function updateSettings(ctx: Ctx, input: unknown) {
   assertCan(ctx.member, "school.settings");
   const data = parse(SchoolInput, input);
+  // Invoices store amounts in minor units of the old currency; switching would silently rescale them.
+  if (data.currency !== ctx.school.currency && (await ctx.s.count(invoice)) > 0) {
+    throw new AppError("conflict", "The currency can't change once invoices exist.");
+  }
   const [row] = await ctx.s._conn.update(school).set(data).where(eq(school.id, ctx.school.id)).returning();
   await audit(ctx.s, ctx.user.id, "school.update", "school", ctx.school.id, {
     before: { name: ctx.school.name, currency: ctx.school.currency, timezone: ctx.school.timezone },

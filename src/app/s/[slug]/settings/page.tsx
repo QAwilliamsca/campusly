@@ -22,7 +22,7 @@ export default async function Settings({ params }: { params: Promise<{ slug: str
           <div>
             <label className="label" htmlFor="currency">Currency (ISO code)</label>
             <input id="currency" name="currency" defaultValue={ctx.school.currency} required maxLength={3} className="input w-32 uppercase" aria-describedby="cur-hint" />
-            <p id="cur-hint" className="mt-1 text-xs text-muted">Existing invoices keep the currency they were created in.</p>
+            <p id="cur-hint" className="mt-1 text-xs text-muted">Locked once the first invoice exists, so amounts are never rescaled.</p>
           </div>
           <div><label className="label" htmlFor="timezone">Timezone</label><select id="timezone" name="timezone" defaultValue={ctx.school.timezone} className="input">{zones.map((z) => <option key={z}>{z}</option>)}</select></div>
           <SubmitButton>Save settings</SubmitButton>

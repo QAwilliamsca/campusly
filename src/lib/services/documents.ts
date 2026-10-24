@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { DB } from "@/db/connect";
 import { document, student } from "@/db/schema";
 import { audit } from "@/db/audit";
+import { planOf, storageUsedBytes } from "@/db/global";
 import type { Ctx } from "../context";
 import { AppError, assertCan, notFound } from "../errors";
 import { detectType, getFile, MAX_UPLOAD_BYTES, putFile, safeFilename, signFileUrl, verifyFileUrl } from "../files";
@@ -14,6 +15,11 @@ export async function uploadDocument(ctx: Ctx, input: { studentId: string; filen
   if (input.bytes.length > MAX_UPLOAD_BYTES) throw new AppError("invalid", "Files must be 5 MB or smaller.");
   const mime = detectType(input.bytes);
   if (!mime) throw new AppError("invalid", "Only PDF, PNG and JPG files are allowed.");
+  const plan = await planOf(ctx.s);
+  // ponytail: check-then-write; two parallel uploads can overshoot by one file. Lock the school row if that matters.
+  if ((await storageUsedBytes(ctx.s)) + input.bytes.length > plan.storageMb * 1024 * 1024) {
+    throw new AppError("limit", `Your ${plan.name} plan includes ${plan.storageMb} MB of documents. Delete files or upgrade.`);
+  }
 
   const storageKey = `${ctx.school.id}/${crypto.randomUUID()}`;
   await putFile(storageKey, input.bytes);

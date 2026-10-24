@@ -17,10 +17,14 @@ async function create() {
     emailAndPassword: {
       enabled: true,
       minPasswordLength: 10,
+      requireEmailVerification: true, // D-010
+      revokeSessionsOnPasswordReset: true,
       sendResetPassword: ({ user, url }) => sendMail(db, { to: user.email, template: "reset-password", subject: "Reset your Campusly password", text: `Reset your password: ${url}\n\nIf you didn't ask for this, ignore this email.` }),
     },
     emailVerification: {
       sendOnSignUp: true,
+      sendOnSignIn: true, // signing in unverified re-sends the link
+      autoSignInAfterVerification: true,
       sendVerificationEmail: ({ user, url }) => sendMail(db, { to: user.email, template: "verify-email", subject: "Verify your email for Campusly", text: `Confirm your email: ${url}` }),
     },
     // Hidden until the founder creates the OAuth app (PLAYBOOK §9.4: social sign-in → button hidden).
@@ -34,6 +38,9 @@ async function create() {
       customRules: Object.fromEntries(
         ["/sign-in/email", "/sign-up/email", "/request-password-reset"].map((p) => [p, { window: 60, max: Number(process.env.AUTH_RATE_LIMIT || 5) }]),
       ),
+    },
+    databaseHooks: {
+      user: { create: { before: async (u) => ({ data: { ...u, name: String(u.name ?? "").trim().slice(0, 100) || "New user" } }) } },
     },
     plugins: [nextCookies()],
   });

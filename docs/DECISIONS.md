@@ -77,3 +77,19 @@ Decision: Email+password and Google sign-in. Google button hidden until founder 
 Date: 2026-10-24   Decided by: Founder   Stage: 2
 Decision: Plans are data rows with a student limit. No billing code in phase 1.
 Affects: `plan` table; student-create enforces limit with a clear upgrade message.
+
+## D-010 — Email must be verified before sign-in and before accepting an invite
+Date: 2026-10-24   Decided by: Founder   Stage: 10 (red-team #1)
+Decision: Unverified accounts can't sign in or accept invites. Locally the verification link is in the mail sink.
+Reason: Without it, an invite's email binding can be bypassed by anyone holding the link.
+Affects: auth config, acceptInvite, sign-up screen, e2e helpers.
+
+## D-011 — Only the owner invites admins; staff can remove members
+Date: 2026-10-24   Decided by: Founder   Stage: 10 (red-team #2)
+Decision: Admin invites are owner-only. Owner removes anyone but themself; admins remove non-staff members.
+Reason: A departed admin must be able to lose access; admins must not mint admins.
+
+## D-012 — Limits: 3 owned schools per account, 500 MB of documents per school
+Date: 2026-10-24   Decided by: Founder   Stage: 10 (red-team #4)
+Decision: Creating a 4th owned school is refused; uploads beyond the plan's storage are refused with a clear message.
+Storage limit lives on the plan row (`plan.storage_mb`) so pricing can change it without code.
