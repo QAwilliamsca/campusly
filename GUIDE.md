@@ -175,7 +175,7 @@ schema (src/db/schema.ts)
 | Exams | `exams.ts` | Report card never shows NaN; unscored ≠ zero |
 | Fees | `fees.ts` | Invoice row locked (`FOR UPDATE`) so parallel payments can't overpay; idempotency key for double clicks |
 
-**Verified in a real browser** with the seeded record "Maple Grove School" (`pnpm seed`), in light and dark, at 375px.
+**Verified in a real browser** with the seeded record "Maple Grove School" (`pnpm seed`), in light and dark, at 375px. The seed has an account for every role, including empty-state accounts: see README → Demo data.
 
 **Try it:** sign in as `teacher@example.com`. Try opening `/s/maple-grove-school/fees` directly. Then sign in as
 `parent@example.com`, copy Leo's student URL, and try changing the ID to another student's.

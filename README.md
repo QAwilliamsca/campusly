@@ -16,14 +16,33 @@ pnpm dev
 ```
 Open http://localhost:3000. The database is embedded Postgres ([PGlite](https://pglite.dev)) stored in `.data/`.
 
-**Demo sign-ins** (fictional people, local only — password is `DEMO_PASSWORD` in `.env.example`):
+## Demo data
+`pnpm seed` creates two schools with fictional people. `pnpm seed:reset` wipes local data and starts over (stop
+`pnpm dev` first). **Every account's password is `campusly-demo-1`** (`DEMO_PASSWORD` in `.env.example`; local only,
+never reuse it on a real deployment).
 
-| Email | Role | Sees |
+| Email | Role | What to try |
 |---|---|---|
-| principal@example.com | Owner | Everything in Maple Grove School |
-| teacher@example.com | Teacher | Grade 5-A only: students, attendance, exams |
-| parent@example.com | Parent | Leo Santos only |
-| student@example.com | Student | Own record only |
+| principal@example.com | Owner of Maple Grove · Admin of Riverside | School picker shows **two schools**. Every screen; invite an **admin** (owner only); remove members |
+| admin@example.com | Admin | Everything except inviting admins or removing the owner/admins. Try it: the Admin role is missing from the invite form |
+| teacher@example.com | Teacher, Grade 5-A | 6 students; attendance already marked **today**; 4 exams with marks |
+| teacher2@example.com | Teacher, Grade 6-B | **Not marked today**; Noah missed Term 1 Maths (left blank, not zero); upcoming Geography exam |
+| newteacher@example.com | Teacher, no class | Empty states: "You don't teach any class yet" |
+| parent@example.com | Parent of Leo + Mia | **Two children cards**; Mia's fees are partly paid **and overdue** |
+| parent2@example.com | Parent of Aisha | One child, fully paid, with a document on file |
+| newparent@example.com | Parent, no child linked | Empty state: "No student is linked to your account yet" |
+| student@example.com | Student (Leo Santos) | Own record only: 100% attendance, report card, partly paid fees |
+| student2@example.com | Student (Aisha Khan) | Own record only: high marks, paid fees |
+| riverside@example.com | Owner of Riverside Academy | A second school in **EUR** and **Europe/London**; can never see Maple Grove |
+
+**What's in Maple Grove School (USD, America/New_York):**
+- **Classes:** Grade 5-A (6 students), Grade 6-B (5), Grade 7-C (empty, no teacher). Kai Müller is a new admission with no class.
+- **Names that test edge cases:** Zoë O'Brien, आरव शर्मा, Mateo García.
+- **Attendance:** 20 school days for 5-A and 6-B, with different patterns per student (from 100% down to ~60%).
+- **Exams:** 4 exams for 5-A (all marked) and 3 for 6-B (one student unscored, one future exam).
+- **Fees:** paid, partly paid, unpaid, overdue (all of 6-B) and one-off invoices (a museum trip, lab materials).
+- **Documents:** on Leo (PDF and PNG) and Aisha (PDF).
+- **Members:** 2 pending invites. The audit log is already full of real entries.
 
 Email is never really sent. New accounts must verify their email (D-010): open the link from the local mail sink at
 http://localhost:3000/dev/mail (enabled by `pnpm dev` via `MAIL_SINK=1`; never set that on a shared server).
