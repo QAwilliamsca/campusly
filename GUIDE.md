@@ -192,7 +192,7 @@ by evidence.
 | Unit | `tests/unit/` | 20 |
 | Integration (real Postgres) | `tests/integration/` | 39 |
 | **Authorization matrix** | `tests/integration/authz-matrix.test.ts` | 71 |
-| Browser (production build) | `tests/e2e/` | 23 |
+| Browser (production build) | `tests/e2e/` | 25 |
 
 **Gate demonstrated:** "an authorization test fails when a visibility filter is removed." The agent deliberately
 let teachers see every student and re-ran the tests: **2 failed**. With the filter restored: **119 passed**.
@@ -246,7 +246,7 @@ Read the cut-line table in [`docs/PLAN.md`](docs/PLAN.md). The code is already s
    question; "A or B, I recommend A because…" is a good one.
 3. **Know which decisions are yours** (anything a customer notices) and which are the agent's (technical). See
    journal Entry 5.
-4. **Ask for evidence, not announcements.** Every claim here has a number: 130 tests, 23 browser tests, 2 tests
+4. **Ask for evidence, not announcements.** Every claim here has a number: 130 tests, 25 browser tests, 2 tests
    red when a filter was removed, 669px → 375px.
 5. **Make it write things down.** Next session, it has forgotten everything except the files.
 

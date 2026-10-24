@@ -208,3 +208,18 @@ touching every screen.
 it without re-arguing (§3.5). Recommending is the agent's job; deciding is the founder's.
 
 ---
+## Entry 8: A direct instruction, not a question
+
+**Founder said:** "Always keep a sun/moon icon toggle on the top-right corner to switch between the themes."
+
+This one needed **no question**. It was specific (what, where, which icons) and customer-visible, so it's the
+founder's call, and the founder had already made it. Claude decided only the technical how (§1.2): a script
+sets the theme before first paint, so there's no flash; the choice is saved per browser; the first visit follows
+the OS setting. Because "always" is a standing rule, Claude wrote it down as **D-014** and added a browser test
+that checks the toggle's position on every kind of page at desktop and phone widths. A future session can't then
+quietly drop it.
+
+**Lesson for students:** when your instruction is already precise, a good agent just does it. Questions are for
+gaps, not for things you've already said.
+
+---

@@ -17,7 +17,7 @@ export default async function Schools() {
   const schools = await listMySchools(await getDb(), user.id);
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <header className="mb-8 flex items-center justify-between gap-4">
+      <header className="mb-8 flex items-center justify-between gap-4 pr-14">
         <span className="flex items-center gap-2 font-semibold"><Logo /> Campusly</span>
         <SignOut />
       </header>

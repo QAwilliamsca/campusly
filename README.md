@@ -51,7 +51,7 @@ http://localhost:3000/dev/mail (enabled by `pnpm dev` via `MAIL_SINK=1`; never s
 ```bash
 pnpm typecheck && pnpm lint
 pnpm test        # 130 unit + integration + authorization-matrix tests on a real in-memory Postgres
-pnpm test:e2e    # 23 browser tests against a production build (first run: pnpm exec playwright install chromium)
+pnpm test:e2e    # 25 browser tests against a production build (first run: pnpm exec playwright install chromium)
 ```
 
 ## Features (Phase 1)

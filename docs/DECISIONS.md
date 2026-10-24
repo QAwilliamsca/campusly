@@ -102,3 +102,10 @@ Options considered: 1) Ink & Paper (agent's recommendation) 2) Evergreen 3) Sunr
 as real screens at /dev/brand, light and dark, each passing WCAG AA.
 Reason: Founder's choice. Friendly and natural; feels like a school rather than a bank.
 Impact (measured): tokens in globals.css, two fonts in layout.tsx, favicon colour. Zero component changes.
+
+## D-014 — Theme toggle: a sun/moon button always top-right on every page
+Date: 2026-10-24   Decided by: Founder   Stage: 3
+Decision: Every page shows a sun/moon toggle fixed to the top-right corner. The first visit follows the OS setting;
+a click switches and is remembered in that browser.
+Affects: root layout (toggle + pre-paint script), dark tokens keyed on `<html data-theme>`, header right padding.
+Reopen only if: the founder changes it.

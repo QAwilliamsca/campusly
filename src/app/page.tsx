@@ -11,7 +11,7 @@ const FEATURES = [
 export default function Home() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between pr-14">
         <span className="flex items-center gap-2 text-lg font-semibold">
           <Logo /> Campusly
         </span>

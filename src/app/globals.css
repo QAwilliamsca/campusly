@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* `dark:` utilities follow the chosen theme, not just the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /*
  * Campusly brand tokens — "Evergreen" (D-013, replaces D-007). PLAYBOOK §8.5: components use
  * these tokens only; no raw colour values anywhere else in the codebase.
@@ -33,28 +36,30 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --accent: #5fd3bd;
-    --accent-hover: #84e0ce;
-    --accent-fg: #04211c;
-    --accent-soft: #0f2e28;
-    --bg: #0c1311;
-    --surface: #131c19;
-    --surface-2: #1a2622;
-    --border: #27352f;
-    --text: #e6efe9;
-    --muted: #9fb1a8;
-    --success: #74d99f;
-    --success-soft: #13301f;
-    --warn: #f5c06b;
-    --warn-soft: #33260f;
-    --danger: #ff9b91;
-    --danger-soft: #3b1714;
-    --focus: #5fd3bd;
-    --shadow: none;
-    color-scheme: dark;
-  }
+/*
+ * Dark theme. <html data-theme> is set before first paint by the script in layout.tsx
+ * (saved choice, else the system setting) and flipped by the sun/moon toggle.
+ */
+:root[data-theme="dark"] {
+  --accent: #5fd3bd;
+  --accent-hover: #84e0ce;
+  --accent-fg: #04211c;
+  --accent-soft: #0f2e28;
+  --bg: #0c1311;
+  --surface: #131c19;
+  --surface-2: #1a2622;
+  --border: #27352f;
+  --text: #e6efe9;
+  --muted: #9fb1a8;
+  --success: #74d99f;
+  --success-soft: #13301f;
+  --warn: #f5c06b;
+  --warn-soft: #33260f;
+  --danger: #ff9b91;
+  --danger-soft: #3b1714;
+  --focus: #5fd3bd;
+  --shadow: none;
+  color-scheme: dark;
 }
 
 @theme inline {

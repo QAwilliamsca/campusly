@@ -63,7 +63,10 @@ const db = await getDb(); db.select().from(schoolClass)…                // lin
   `tests/unit/can.test.ts` and `tests/integration/authz-matrix.test.ts`.
 
 ## 6. Brand tokens, vocabulary, tone
-- Tokens: `src/app/globals.css` (`:root` light, `prefers-color-scheme: dark`). **No raw colours in components** —
+- Tokens: `src/app/globals.css` — `:root` is light, `:root[data-theme="dark"]` is dark. `<html data-theme>` is set
+  before first paint by `THEME_SCRIPT` in `layout.tsx` (saved choice, else OS), and flipped by `ThemeToggle`.
+- **D-014: the sun/moon toggle is fixed top-right on every page.** Any new top bar needs right padding
+  (`pr-14`/`pr-16`) so its buttons don't sit under it. `tests/e2e/theme.spec.ts` checks the position. **No raw colours in components** —
   use `bg-accent`, `text-muted`, `card`, `btn-primary`, `input`, `data-table`, `badge` etc.
 - Accessibility baked in: text ≥ 4.5:1, `:focus-visible` ring, 44px minimum targets (`min-h-11`), reduced motion.
 - **Vocabulary (customer-visible):** School, Class, Student, Teacher, Parent, Member, Invite, Attendance, Exam,
