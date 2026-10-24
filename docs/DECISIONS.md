@@ -116,7 +116,7 @@ Decision: `DEMO_MODE=1` on the server closes sign-up (UI and API) and lists the 
 Reason: D-010 needs a verified email and there is no mail provider yet; this keeps red-team #1 closed on a public site.
 Known risk: anyone can sign in as a demo user and edit demo data. `sudo campusly-reset-demo` restores it.
 
-## D-016 — Hosting: one AWS Lightsail server in Mumbai, free sslip.io HTTPS address, embedded database
+## D-016 — (Superseded by D-017) Hosting: one AWS Lightsail server in Mumbai, free sslip.io HTTPS address, embedded database
 Date: 2026-10-24   Decided by: Agent default (recommended options; founder may overturn)   Stage: 11
 Decision: Ubuntu 24.04 Lightsail instance (2 GB plan) in ap-south-1 with a static IP; Caddy for automatic HTTPS on
 `campusly.<ip-with-dashes>.sslip.io`; PGlite data in `/var/lib/campusly` (single app process, fine for a demo).
@@ -124,3 +124,23 @@ Options considered: Lightsail · EC2 + Docker · App Runner + RDS; PGlite vs man
 Reason: lowest monthly cost from the sign-up credit, fewest console screens for a live class, no extra services.
 Upgrade path: set `DATABASE_URL` to a Postgres (e.g. Lightsail database) — no code change.
 Affects: `deploy/` scripts, docs/DEPLOY_AWS.md.
+
+## D-017 — Hosting moves to one EC2 server (supersedes D-016)
+Date: 2026-10-24   Decided by: Founder   Stage: 11
+Decision: one EC2 **t3.small** (2 vCPU, 2 GiB) in ap-south-1, Ubuntu **24.04** LTS (not Pro, not 26.04), 20 GiB gp3,
+no key pair (browser terminal via EC2 Instance Connect), security group open on 22/80/443, an **Elastic IP**, and
+`deploy/ec2-user-data.sh` as user data. Same Caddy + sslip.io + PGlite set-up as D-016.
+Options considered: keep Lightsail (it never served the site) · EC2.
+Reason: the founder chose EC2 (the service students will meet in jobs); same scripts, same cost range (~$17/month
+plus about $3.60/month for the public IPv4 address), paid from the sign-up credit.
+Upgrade path: `DATABASE_URL` to RDS Postgres — no code change.
+Affects: `deploy/ec2-user-data.sh`, docs/DEPLOY_AWS.md, guided document Part 13.
+
+## D-018 — The repository is public
+Date: 2026-10-24   Decided by: Founder   Stage: 11
+Decision: https://github.com/shivavashishtha/campusly is public. Students fork it, then clone their fork.
+Reason: students need it without invitations; the server downloads it with no token. Full history was scanned for
+secrets before switching (none: demo data only, secrets are generated on the server).
+Known risk: anyone can read the code. Nothing secret may ever be committed (CLAUDE.md rules already forbid it).
+Reopen only if: commercial code is added.
+

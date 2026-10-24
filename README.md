@@ -9,9 +9,14 @@ for every question the agent asked the founder. [`CLAUDE.md`](CLAUDE.md) briefs 
 
 ## Get started (no coding knowledge needed)
 
-**1. Get the code — keep the git history** (the commits *are* the lesson, so avoid "Download ZIP"):
-- **Easiest:** install [GitHub Desktop](https://desktop.github.com), then on this repo's page click **Code → Open with GitHub Desktop**.
-- **Or ask Claude Code:** *"Clone this repository into a folder: &lt;paste the repo link&gt;"*.
+**Live demo:** https://campusly.13-127-195-244.sslip.io (sign in with any demo account below).
+
+**1. Get the code: keep the git history** (the commits *are* the lesson, so avoid "Download ZIP"). The repository is
+**public**: https://github.com/shivavashishtha/campusly. You need only a free GitHub account; no invitation is needed.
+- **Fork it first:** on the repo page click **Fork → Create fork**. You get your own copy at
+  `github.com/<your-username>/campusly`, which you can push your own branches to.
+- **Then clone your fork:** install [GitHub Desktop](https://desktop.github.com), open **your fork's** page and click
+  **Code → Open with GitHub Desktop**. Or ask Claude Code: *"Clone https://github.com/&lt;your-username&gt;/campusly into a folder"*.
 
 **2. Install Node.js once:** download the **LTS** version (22 or newer) from [nodejs.org](https://nodejs.org) and click through the installer.
 

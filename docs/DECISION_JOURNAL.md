@@ -246,3 +246,22 @@ rest itself, because it was all technical (§1.2):
 a private repo needs GitHub Pro/Team or a fork-and-pull-request workflow.
 
 ---
+
+## Entry 10: Deploying, then changing the host and the repo's visibility
+
+**Founder said:** "Let's not build it on Lightsail, let's build it on EC2. Delete this instance, create a new one on
+EC2." Later: "Make the repo public temporarily so the server can download it", and finally: "use this repo URL and
+guide the students that this is a public repo that they need to use."
+
+| Question | Options | Claude recommended | Founder chose |
+|---|---|---|---|
+| Host | Lightsail · EC2 | Lightsail (fewer screens) | **EC2** (D-017) |
+| How the server downloads a private repo | Read-only token at a hidden prompt · deploy key · make the repo public | Read-only token, never pasted in chat | Public, first temporarily, then **permanently** (D-018) |
+
+**What went wrong, so you don't repeat it:**
+- The Lightsail server never served the site. On EC2 the log showed why: the setup script ran with an **empty token**
+  against a private repo, so `git clone` failed with *could not read Username*. The token step matters (DEPLOY_AWS.md).
+- The founder pasted a GitHub token into the chat. Claude refused to use it and asked them to delete it on GitHub:
+  **a secret typed into a chat is a leaked secret.**
+- The EC2 wizard's "Confirm changes" dialog sits on top of the wizard's Cancel button; one stray click threw the
+  form away. Lesson: one click, then one screenshot, before the next click.

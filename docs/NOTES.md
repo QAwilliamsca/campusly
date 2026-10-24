@@ -1,13 +1,10 @@
 # NOTES.md
 
 ## ➡️ Next step (start here next session)
-0. **Finish the AWS deploy.** Lightsail instance `campusly` (Mumbai, $12/mo, static IP 35.154.168.246) is running and
-   both status checks pass, but https://campusly.35-154-168-246.sslip.io and plain port 80 did not answer ~20 min
-   after creation, and Lightsail browser SSH said CLIENT_UNAUTHORIZED [769]. Next: retry browser SSH and read
-   /var/log/cloud-init-output.log and /var/log/campusly-install.log. Suspects: the first-boot apt lock (unattended
-   upgrades) or the token not pasted. If needed, delete and recreate with the launch script. Guide: docs/DEPLOY_AWS.md.
-1. Push to GitHub (founder creates the repo; decides public vs private — see journal Entry 9) and confirm CI is
-   green on the first run. Codespaces setup is written but not yet tried in a real codespace.
+0. **Live:** https://campusly.13-127-195-244.sslip.io on EC2 `i-0a03ce5bb3a62ee21` (Mumbai, t3.small, Elastic IP
+   13.127.195.244). Repo is public (D-018). Redeploy: Instance Connect → `sudo campusly-update`. The Lightsail
+   attempt was deleted; its root cause was an empty token on a then-private repo (see DEPLOY_AWS.md).
+1. CI on GitHub: confirm the Actions run is green (the last push showed a red ✕; check before class).
 2. Red-team #7 (client-IP header) and invite-volume limits (#12) are deferred to Stages 11 and 8 (see RUNBOOK).
 3. Founder items: domain/trademark check for "Campusly"; Google OAuth keys (RUNBOOK); decide 2FA timing.
 4. Next slices below the cut line, in the order schools will notice them: real email (Stage 8) → backups and deploy

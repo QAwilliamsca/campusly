@@ -3,8 +3,8 @@
 # It runs once, as root, on the server's first boot (about 10 minutes until the site is up).
 # Progress: /var/log/cloud-init-output.log, then /var/log/campusly-install.log ("CAMPUSLY READY" at the end).
 #
-# PRIVATE repo: paste a read-only GitHub token below (Settings → Developer settings → Fine-grained tokens:
-# only this repository, Contents = Read-only). PUBLIC repo: leave it empty.
+# The repo is PUBLIC, so leave GITHUB_TOKEN empty. Only if YOUR copy is private: paste a read-only token
+# (Settings → Developer settings → Fine-grained tokens: only that repository, Contents = Read-only).
 GITHUB_TOKEN=""
 REPO="github.com/shivavashishtha/campusly.git"
 
